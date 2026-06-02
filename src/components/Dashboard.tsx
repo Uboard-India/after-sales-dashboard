@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { RefreshCw, AlertCircle, LogOut } from "lucide-react";
+import Link from "next/link";
+import { RefreshCw, AlertCircle, LogOut, Table2 } from "lucide-react";
 import type { ComplaintRow, ApiResponse } from "@/lib/types";
 import HeroStats from "./HeroStats";
 import KPICard from "./KPICard";
@@ -229,6 +230,13 @@ export default function Dashboard() {
                 Updated {new Date(lastUpdated).toLocaleTimeString()}
               </span>
             )}
+            <Link
+              href="/live"
+              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition"
+            >
+              <Table2 size={13} />
+              Live Feed
+            </Link>
             <button
               onClick={handleRefresh}
               disabled={refreshing}
