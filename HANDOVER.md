@@ -87,7 +87,15 @@ It is **read-only** against the Google Sheets — the dashboard never writes to 
 3. After transfer, confirm the GitHub repo is still connected
    (**Settings → Git**). If not, click **Connect Git Repository** and pick the repo.
 
-**If Asis ever needs a brand-new Vercel project instead:**
+> **Plan limitation (observed during handover):** adding a member with deploy rights to a
+> *single project* (the "Assign project role" screen) is **Enterprise-only** — on lower plans
+> it only offers read-only **Viewer**. On **Pro**, add Asis as a full **Team Member** via the
+> general *Team Settings → Members* page instead. On the free **Hobby** plan you can't add
+> members at all — in that case use the "brand-new Vercel project" path below (recommended:
+> Asis owns hosting fully, no upgrade needed). Since Asis has GitHub admin, code changes still
+> auto-deploy regardless.
+
+**If Asis ever needs a brand-new Vercel project instead (recommended on Hobby/Pro):**
 1. Asis logs into Vercel → **Add New → Project** → import `after-sales-dashboard` from GitHub.
 2. Framework auto-detects **Next.js** — no build config needed.
 3. **Add the environment variables** from Section 5 (Production scope).
