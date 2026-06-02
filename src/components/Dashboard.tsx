@@ -3,7 +3,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { RefreshCw, AlertCircle, LogOut, Table2 } from "lucide-react";
+import { RefreshCw, AlertCircle, LogOut, Table2, Bot } from "lucide-react";
+import { PENDING_BOT_COUNT } from "@/lib/botMock";
 import type { ComplaintRow, ApiResponse } from "@/lib/types";
 import HeroStats from "./HeroStats";
 import KPICard from "./KPICard";
@@ -258,6 +259,24 @@ export default function Dashboard() {
             >
               <Table2 size={13} />
               Live Feed
+            </Link>
+            <Link
+              href="/verify"
+              className="relative flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition"
+            >
+              <Bot size={13} />
+              Verification
+              {PENDING_BOT_COUNT > 0 && (
+                <>
+                  {/* pulsing ring drawing attention to new entries */}
+                  <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                    <span className="relative inline-flex items-center justify-center rounded-full h-4 min-w-4 px-1 bg-red-500 text-white text-[9px] font-bold leading-none">
+                      {PENDING_BOT_COUNT}
+                    </span>
+                  </span>
+                </>
+              )}
             </Link>
             <button
               onClick={handleRefresh}
