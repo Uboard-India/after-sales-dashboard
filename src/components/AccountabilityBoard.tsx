@@ -124,9 +124,17 @@ export default function AccountabilityBoard({ openRows, tracking }: Props) {
       {active && (
       <div className="overflow-x-auto table-scroll">
         <div className="flex items-center justify-between mb-2">
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500 flex items-center gap-2 flex-wrap">
             <b>{BUCKET_META[active as Exclude<Bucket, "Other">]?.label ?? active}</b> queue
             · {visible.length} units · owner {BUCKET_OWNER[active]} · most-aged first
+            {(() => {
+              const blanks = visible.filter((r) => !r.actionTaken?.trim()).length;
+              return blanks > 0 ? (
+                <span className="inline-flex items-center gap-1 text-red-600 font-semibold bg-red-50 px-2 py-0.5 rounded-full text-[11px]">
+                  ⚠ {blanks} missing status in sheet
+                </span>
+              ) : null;
+            })()}
           </p>
           <button onClick={() => setActive(null)} className="text-xs text-indigo-600 hover:underline">
             ✕ Close list
@@ -143,8 +151,9 @@ export default function AccountabilityBoard({ openRows, tracking }: Props) {
           <tbody>
             {visible.slice(0, 50).map((r) => {
               const meta = r.bucket !== "Other" ? BUCKET_META[r.bucket] : null;
+              const blankStatus = !r.actionTaken || r.actionTaken.trim() === "";
               return (
-                <tr key={r.id} className="border-b border-slate-50 hover:bg-slate-50 transition">
+                <tr key={r.id} className={`border-b border-slate-50 hover:bg-slate-50 transition ${blankStatus ? "bg-red-50" : ""}`}>
                   <td className="py-2 pr-3 text-slate-400 font-mono">{r.sequenceNo}</td>
                   <td className="py-2 pr-3 text-slate-700 whitespace-nowrap">{r.productName || "—"}</td>
                   <td className="py-2 pr-3">
@@ -166,7 +175,16 @@ export default function AccountabilityBoard({ openRows, tracking }: Props) {
                   <td className="py-2 pr-3 text-right text-slate-600">
                     {r.daysPending != null ? `${r.daysPending}d` : "—"}
                   </td>
-                  <td className="py-2 pr-3 text-slate-500 whitespace-nowrap">{r.actionTaken || "Registered"}</td>
+                  <td className="py-2 pr-3 whitespace-nowrap">
+                    {blankStatus ? (
+                      <span className="flex items-center gap-1 text-red-600 font-semibold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 inline-block" />
+                        No status — fix in sheet
+                      </span>
+                    ) : (
+                      <span className="text-slate-500">{r.actionTaken}</span>
+                    )}
+                  </td>
                 </tr>
               );
             })}
