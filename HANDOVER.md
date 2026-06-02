@@ -1,9 +1,12 @@
 # After Sales Dashboard — Ownership Handover
 
-**Prepared for:** Asis
+**Prepared for:** Asis — GitHub `THEOASIS11`, email `cloud@uboardindia.com`
 **Handover from:** UBOARD (current owner)
 **Date:** June 2026
 **Live dashboard:** https://after-sales-dashboard.vercel.app
+**Transfer mode:** Asis added as **admin** alongside current owner (shared ownership).
+
+**Status:** ✅ GitHub admin invite sent to `THEOASIS11` (awaiting accept) · ⬜ Vercel · ⬜ Google Sheets
 
 This document contains **everything** needed to fully own, run, change, and deploy the
 After Sales Dashboard. Read it top to bottom once, then keep it as reference.
