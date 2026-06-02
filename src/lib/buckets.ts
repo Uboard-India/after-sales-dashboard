@@ -61,7 +61,6 @@ export function isInFactory(bucket: Bucket): boolean {
 
 export interface EnrichedRow extends ComplaintRow {
   bucket: Bucket;
-  daysInFactory: number | null;
   daysSinceAssigned: number | null;
   assignedTo: string;
   assignedDate: string;
@@ -79,7 +78,6 @@ export function enrich(
   return {
     ...r,
     bucket,
-    daysInFactory: daysSince(r.productReceivedDate),
     daysSinceAssigned: track?.assignedDate ? daysSince(track.assignedDate) : null,
     assignedTo: track?.assignedTo ?? "",
     assignedDate: track?.assignedDate ?? "",

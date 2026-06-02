@@ -1,4 +1,6 @@
 export interface ComplaintRow {
+  id: string;
+  fiscalYear: string;
   sequenceNo: string;
   complaintDate: string;
   monthYear: string;
@@ -21,6 +23,7 @@ export interface ComplaintRow {
   productReceivedDate: string;
   dispatchTrackingDate: string;
   daysPending: number | null;
+  daysInFactory: number | null;
   ageingDays: string;
   isOpen: boolean;
 }

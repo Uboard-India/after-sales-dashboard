@@ -135,7 +135,7 @@ export default function AccountabilityBoard({ openRows, tracking }: Props) {
             {visible.slice(0, 50).map((r) => {
               const meta = r.bucket !== "Other" ? BUCKET_META[r.bucket] : null;
               return (
-                <tr key={r.sequenceNo} className="border-b border-slate-50 hover:bg-slate-50 transition">
+                <tr key={r.id} className="border-b border-slate-50 hover:bg-slate-50 transition">
                   <td className="py-2 pr-3 text-slate-400 font-mono">{r.sequenceNo}</td>
                   <td className="py-2 pr-3 text-slate-700 whitespace-nowrap">{r.productName || "—"}</td>
                   <td className="py-2 pr-3">

@@ -16,10 +16,9 @@ import RequestByTable from "./RequestByTable";
 import OpenTicketsTable from "./OpenTicketsTable";
 import IssueByProductTable from "./IssueByProductTable";
 
-const MONTH_ORDER = [
-  "Apr-2025","May-2025","Jun-2025","Jul-2025","Aug-2025","Sep-2025",
-  "Oct-2025","Nov-2025","Dec-2025","Jan-2026","Feb-2026","Mar-2026","Apr-2026",
-];
+const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MONTH_ORDER: string[] = [];
+for (let y = 2025; y <= 2028; y++) for (const m of MONTH_NAMES) MONTH_ORDER.push(`${m}-${y}`);
 
 export default function Dashboard() {
   const router = useRouter();
@@ -38,6 +37,7 @@ export default function Dashboard() {
   }
 
   // Filters
+  const [filterYear, setFilterYear] = useState("All");
   const [filterBrand, setFilterBrand] = useState("All");
   const [filterComplaintType, setFilterComplaintType] = useState("All");
   const [filterMonth, setFilterMonth] = useState("All");
@@ -67,6 +67,11 @@ export default function Dashboard() {
   }
 
   // Unique filter options
+  const years = useMemo(() => {
+    const s = new Set(data.map((r) => r.fiscalYear).filter(Boolean));
+    return ["All", ...Array.from(s).sort()];
+  }, [data]);
+
   const brands = useMemo(() => {
     const s = new Set(data.map((r) => r.brand).filter(Boolean));
     return ["All", ...Array.from(s).sort()];
@@ -83,12 +88,13 @@ export default function Dashboard() {
   // Filtered data
   const filtered = useMemo(() => {
     return data.filter((r) => {
+      if (filterYear !== "All" && r.fiscalYear !== filterYear) return false;
       if (filterBrand !== "All" && r.brand !== filterBrand) return false;
       if (filterComplaintType !== "All" && r.complaintType !== filterComplaintType) return false;
       if (filterMonth !== "All" && r.monthYear !== filterMonth) return false;
       return true;
     });
-  }, [data, filterBrand, filterComplaintType, filterMonth]);
+  }, [data, filterYear, filterBrand, filterComplaintType, filterMonth]);
 
   // KPIs
   const kpis = useMemo(() => {
@@ -256,6 +262,12 @@ export default function Dashboard() {
         <div className="flex flex-wrap gap-3 bg-white rounded-xl border border-slate-200 px-4 py-3">
           <span className="text-xs font-medium text-slate-500 self-center">Filters:</span>
           <FilterSelect
+            label="Year"
+            value={filterYear}
+            options={years}
+            onChange={setFilterYear}
+          />
+          <FilterSelect
             label="Brand"
             value={filterBrand}
             options={brands}
@@ -273,9 +285,9 @@ export default function Dashboard() {
             options={months}
             onChange={setFilterMonth}
           />
-          {(filterBrand !== "All" || filterComplaintType !== "All" || filterMonth !== "All") && (
+          {(filterYear !== "All" || filterBrand !== "All" || filterComplaintType !== "All" || filterMonth !== "All") && (
             <button
-              onClick={() => { setFilterBrand("All"); setFilterComplaintType("All"); setFilterMonth("All"); }}
+              onClick={() => { setFilterYear("All"); setFilterBrand("All"); setFilterComplaintType("All"); setFilterMonth("All"); }}
               className="text-xs text-indigo-600 hover:underline self-center ml-1"
             >
               Clear all

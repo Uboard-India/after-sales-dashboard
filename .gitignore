@@ -34,4 +34,7 @@ yarn-error.log*
 next-env.d.ts
 
 # data files (not needed in repo)
-data.csv
+data*.csv
+*.mjs
+api_out.json
+.next-dev.log

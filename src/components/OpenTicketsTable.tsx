@@ -129,7 +129,7 @@ export default function OpenTicketsTable({ rows }: Props) {
           </thead>
           <tbody>
             {paged.map((r) => (
-              <tr key={r.sequenceNo} className="border-b border-slate-50 hover:bg-slate-50 transition">
+              <tr key={r.id} className="border-b border-slate-50 hover:bg-slate-50 transition">
                 <td className="py-2 pr-3 text-slate-400 font-mono">{r.sequenceNo}</td>
                 <td className="py-2 pr-3 text-slate-600 whitespace-nowrap">{r.complaintDate}</td>
                 <td className="py-2 pr-3 font-medium text-slate-800 whitespace-nowrap">{r.requestBy || "—"}</td>
