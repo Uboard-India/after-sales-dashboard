@@ -43,6 +43,7 @@ function findMatches(entry: BotEntry, rows: ComplaintRow[]): Match[] {
   rows.forEach((r) => {
     if (seen.has(r.id)) return;
     if (!r.customerMobile) return;
+    if (r.actionTaken === "Close Ticket") return; // skip closed complaints
     const rMobile = r.customerMobile.replace(/[\s\-().+]/g, "").replace(/^91/, "");
     if (rMobile === entry.mobile) {
       seen.add(r.id);
