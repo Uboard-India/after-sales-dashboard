@@ -66,3 +66,6 @@ export const MOCK_BOT_ENTRIES: BotEntry[] = [
 
 /** Pending = entries with no decision yet. Mock: all entries are pending. */
 export const PENDING_BOT_COUNT = MOCK_BOT_ENTRIES.length;
+
+/** Real bot sheet entry count — fetched server-side and passed as a prop if needed. */
+export const REAL_BOT_SHEET_ID = "1UXYV_aiQnwm7llAbNSu4x0noS2vztj3My3aNrJmi9lU";
