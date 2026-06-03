@@ -170,11 +170,10 @@ export default function VerifyPage() {
 
         {/* Data quality warning */}
         {noMobileCount > 0 && (
-          <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg px-4 py-3 text-sm">
+          <div className="flex items-start gap-2 bg-slate-100 border border-slate-200 text-slate-600 rounded-lg px-4 py-3 text-sm">
             <AlertTriangle size={15} className="mt-0.5 shrink-0" />
             <div>
-              <b>{noMobileCount} entries have no valid mobile number</b> — duplicate detection won&apos;t work for them.
-              Send <b>BOT-INSTRUCTIONS-ALOK.md</b> to Alok to fix the bot so it auto-picks the sender&apos;s WhatsApp number.
+              <b>{noMobileCount} older entries have no mobile number</b> — duplicate detection won&apos;t work for them. New bot entries will include name &amp; number automatically.
             </div>
           </div>
         )}
