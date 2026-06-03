@@ -36,29 +36,15 @@ interface Match {
 type Decision = { decision: "new" | "linked" | "rejected"; linkedTo?: string };
 
 function findMatches(entry: BotEntry, rows: ComplaintRow[]): Match[] {
+  if (!entry.hasMobile) return [];
   const matches: Match[] = [];
   const seen = new Set<string>();
 
   rows.forEach((r) => {
     if (seen.has(r.id)) return;
-    let matchedOn = "";
-
-    // Strong: same cleaned mobile
-    if (entry.hasMobile && r.customerMobile) {
-      const rMobile = r.customerMobile.replace(/[\s\-().+]/g, "").replace(/^91/, "");
-      if (rMobile === entry.mobile) matchedOn = "Same mobile number";
-    }
-
-    // Medium: similar name + open + recent
-    if (!matchedOn && entry.customerName && r.customerName) {
-      const a = entry.customerName.toLowerCase().trim();
-      const b = r.customerName.toLowerCase().trim();
-      if (a.length > 2 && b.length > 2 && (a.includes(b.split(" ")[0]) || b.includes(a.split(" ")[0]))) {
-        matchedOn = "Similar customer name";
-      }
-    }
-
-    if (matchedOn) {
+    if (!r.customerMobile) return;
+    const rMobile = r.customerMobile.replace(/[\s\-().+]/g, "").replace(/^91/, "");
+    if (rMobile === entry.mobile) {
       seen.add(r.id);
       matches.push({
         id: r.id,
@@ -66,7 +52,7 @@ function findMatches(entry: BotEntry, rows: ComplaintRow[]): Match[] {
         date: r.complaintDate,
         product: r.productName,
         status: r.actionTaken || "Complaint Register",
-        matchedOn,
+        matchedOn: "Same mobile number",
       });
     }
   });
