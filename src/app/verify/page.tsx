@@ -51,6 +51,18 @@ function isUrl(s: string) {
   return s?.startsWith("http");
 }
 
+function completion(e: BotEntry): number {
+  const fields = [
+    !!e.customerName,
+    e.hasMobile,
+    !!e.product,
+    !!(e.issue && !isUrl(e.issue)),
+    !!e.platform,
+    !!e.brand,
+  ];
+  return Math.round((fields.filter(Boolean).length / fields.length) * 100);
+}
+
 function findMatches(entry: BotEntry, rows: ComplaintRow[]): Match[] {
   if (!entry.hasMobile) return [];
   const matches: Match[] = [];
@@ -240,6 +252,8 @@ export default function VerifyPage() {
           const isExpanded = expandedId === e.botId;
           const draft = getDraft(e);
           const hasMatch = matches.length > 0;
+          const pct = completion(e);
+          const pctColor = pct === 100 ? "text-emerald-600 bg-emerald-50" : pct >= 50 ? "text-amber-600 bg-amber-50" : "text-red-500 bg-red-50";
 
           return (
             <div
@@ -248,12 +262,13 @@ export default function VerifyPage() {
                 hasMatch ? "border-amber-300" : "border-slate-200"
               }`}
             >
-              {/* Collapsed row — click to expand */}
-              <button
-                onClick={() => setExpandedId(isExpanded ? null : e.botId)}
-                className="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-50 transition text-left gap-2"
-              >
-                <div className="flex items-center gap-3 flex-wrap min-w-0">
+              {/* Collapsed row */}
+              <div className="flex items-center gap-2 px-4 py-2.5">
+                {/* Left: click to expand */}
+                <button
+                  onClick={() => setExpandedId(isExpanded ? null : e.botId)}
+                  className="flex-1 flex items-center gap-3 flex-wrap min-w-0 text-left hover:opacity-80 transition"
+                >
                   <span className="font-mono text-xs font-bold text-indigo-600 shrink-0">{e.botId}</span>
                   <span className="flex items-center gap-1 text-xs text-slate-400 shrink-0">
                     <Clock size={11} /> {e.timestamp}
@@ -262,11 +277,11 @@ export default function VerifyPage() {
                     <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600 shrink-0">{e.brand}</span>
                   )}
                   {e.customerName ? (
-                    <span className="flex items-center gap-1 text-xs text-slate-700 font-medium truncate">
+                    <span className="flex items-center gap-1 text-xs text-slate-700 font-medium">
                       <User size={11} className="text-slate-400 shrink-0" /> {e.customerName}
                     </span>
                   ) : (
-                    <span className="text-xs text-slate-400 italic">No name</span>
+                    <span className="text-xs text-red-400 italic shrink-0">⚠ No name</span>
                   )}
                   {e.hasMobile ? (
                     <span className="flex items-center gap-1 text-xs text-slate-500 font-mono shrink-0">
@@ -277,23 +292,51 @@ export default function VerifyPage() {
                       <PhoneOff size={11} /> No number
                     </span>
                   )}
-                  {e.product && (
-                    <span className="flex items-center gap-1 text-xs text-slate-500 truncate">
+                  {e.product ? (
+                    <span className="flex items-center gap-1 text-xs text-slate-500">
                       <Package size={11} className="text-slate-400 shrink-0" /> {e.product}
                     </span>
+                  ) : (
+                    <span className="text-xs text-red-400 shrink-0">⚠ No product</span>
                   )}
-                </div>
+                </button>
+
+                {/* Right: badges + quick actions */}
                 <div className="flex items-center gap-2 shrink-0">
+                  {/* Completion % */}
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${pctColor}`}>
+                    {pct}%
+                  </span>
                   {hasMatch && (
                     <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 shrink-0">
-                      ⚠ {matches.length} open match{matches.length > 1 ? "es" : ""}
+                      ⚠ {matches.length} match{matches.length > 1 ? "es" : ""}
                     </span>
                   )}
-                  {isExpanded
-                    ? <ChevronUp size={15} className="text-slate-400" />
-                    : <ChevronDown size={15} className="text-slate-400" />}
+                  {/* Quick approve */}
+                  <button
+                    onClick={(ev) => { ev.stopPropagation(); decide(e.botId, { decision: "new", draft }); }}
+                    className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 font-semibold"
+                    title="Approve as new complaint"
+                  >
+                    <CheckCircle2 size={12} /> Approve
+                  </button>
+                  {/* Quick reject */}
+                  <button
+                    onClick={(ev) => { ev.stopPropagation(); decide(e.botId, { decision: "rejected" }); }}
+                    className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 font-semibold border border-red-200"
+                    title="Reject"
+                  >
+                    <XCircle size={12} /> Reject
+                  </button>
+                  {/* Expand toggle */}
+                  <button
+                    onClick={() => setExpandedId(isExpanded ? null : e.botId)}
+                    className="p-1 rounded text-slate-400 hover:text-slate-600"
+                  >
+                    {isExpanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+                  </button>
                 </div>
-              </button>
+              </div>
 
               {/* Expanded panel */}
               {isExpanded && (
