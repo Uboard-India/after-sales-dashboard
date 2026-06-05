@@ -2,27 +2,43 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Search, LogOut, LayoutDashboard, Package, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
-import type { SparePartsData, PriceListRow, ProductMasterRow } from "@/lib/spareparts-types";
+import { Search, LogOut, LayoutDashboard, Package, ChevronDown, ChevronRight, AlertTriangle, CheckCircle2, IndianRupee } from "lucide-react";
+import type { SparePartsData, PriceListRow } from "@/lib/spareparts-types";
 
-const PER_PAGE = 20;
+/* ─────────────────────────── helpers ─────────────────────────── */
+
+const BRANDS = ["All", "Uboard", "Tygatec"];
+
+function parseNum(s: string): number | null {
+  if (!s || s.toLowerCase() === "na") return null;
+  const n = parseFloat(s.replace(/[^0-9.]/g, ""));
+  return isNaN(n) ? null : n;
+}
+
+function fmtRs(s: string): { val: number | null; display: string } {
+  const v = parseNum(s);
+  return { val: v, display: v != null ? `₹${v.toLocaleString("en-IN")}` : "" };
+}
+
+function hasPricing(row: PriceListRow) {
+  return parseNum(row.MaxB2C) != null || parseNum(row.MinB2B) != null;
+}
+
+/* ─────────────────────────── main component ─────────────────────── */
 
 export default function SparePartsPage() {
   const router = useRouter();
   const [data, setData] = useState<SparePartsData | null>(null);
   const [loading, setLoading] = useState(true);
-
-  // filters
   const [search, setSearch] = useState("");
-  const [filterProduct, setFilterProduct] = useState("All");
-  const [filterBrand, setFilterBrand] = useState("All");
-  const [filterMissing, setFilterMissing] = useState(false);
-  const [page, setPage] = useState(1);
+  const [brand, setBrand] = useState("All");
+  const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
+  const [expandMissing, setExpandMissing] = useState(false);
 
   useEffect(() => {
     fetch("/api/spareparts")
       .then((r) => r.json())
-      .then((d) => { setData(d); setLoading(false); });
+      .then((d: SparePartsData) => { setData(d); setLoading(false); });
   }, []);
 
   async function handleLogout() {
@@ -30,320 +46,344 @@ export default function SparePartsPage() {
     router.push("/login");
   }
 
-  const productMap = useMemo(() => {
-    if (!data) return new Map<string, ProductMasterRow>();
-    const m = new Map<string, ProductMasterRow>();
-    data.productMaster.forEach((p) => m.set(p.Product, p));
-    return m;
-  }, [data]);
-
-  const brands = useMemo(() => {
-    if (!data) return ["All"];
-    const s = new Set(data.productMaster.map((p) => p.Brand).filter(Boolean));
-    return ["All", ...Array.from(s).sort()];
-  }, [data]);
-
-  const products = useMemo(() => {
-    if (!data) return ["All"];
-    const s = new Set(data.priceList.map((r) => r.Product).filter(Boolean));
-    return ["All", ...Array.from(s).sort()];
-  }, [data]);
-
-  const filtered = useMemo(() => {
+  /* products with at least one priced part */
+  const pricedProducts = useMemo(() => {
     if (!data) return [];
-    const q = search.toLowerCase();
-    return data.priceList.filter((r) => {
-      if (filterProduct !== "All" && r.Product !== filterProduct) return false;
-      if (filterBrand !== "All") {
-        const pm = productMap.get(r.Product);
-        if (!pm || pm.Brand !== filterBrand) return false;
+    const map = new Map<string, { brand: string; rows: PriceListRow[] }>();
+    data.priceList.forEach((r) => {
+      if (r.Product.startsWith("REVIEW")) return;
+      if (!map.has(r.Product)) {
+        const pm = data.productMaster.find((p) => p.Product === r.Product);
+        map.set(r.Product, { brand: pm?.Brand ?? "", rows: [] });
       }
-      if (filterMissing && r.MaxB2C !== "" && r.MinB2B !== "") return false;
-      if (q && !r.Product.toLowerCase().includes(q) && !r.SparePart.toLowerCase().includes(q)) return false;
+      map.get(r.Product)!.rows.push(r);
+    });
+    return Array.from(map.entries())
+      .map(([name, v]) => ({
+        name,
+        brand: v.brand,
+        rows: v.rows,
+        pricedRows: v.rows.filter(hasPricing),
+        missingCount: v.rows.filter((r) => !hasPricing(r)).length,
+      }))
+      .filter((p) => p.pricedRows.length > 0)   // only show if has ≥1 priced part
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [data]);
+
+  /* products with ZERO pricing */
+  const unpricedProducts = useMemo(() => {
+    if (!data) return [];
+    return data.productMaster
+      .filter((p) => p.HasPriceList !== "Yes" && p.HasRepairHistory && p.HasRepairHistory !== "No")
+      .map((p) => {
+        const repairMatch = p.HasRepairHistory.match(/\((\d+)\)/);
+        const repairs = repairMatch ? parseInt(repairMatch[1]) : 0;
+        return { ...p, repairs };
+      })
+      .sort((a, b) => b.repairs - a.repairs);
+  }, [data]);
+
+  /* filtered product list */
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase();
+    return pricedProducts.filter((p) => {
+      if (brand !== "All" && p.brand !== brand) return false;
+      if (q && !p.name.toLowerCase().includes(q) && !p.rows.some((r) => r.SparePart.toLowerCase().includes(q))) return false;
       return true;
     });
-  }, [data, search, filterProduct, filterBrand, filterMissing, productMap]);
+  }, [pricedProducts, brand, search]);
 
-  const totalPages = Math.ceil(filtered.length / PER_PAGE);
-  const paged = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  /* auto-select first product */
+  useEffect(() => {
+    if (filtered.length > 0 && !selectedProduct) setSelectedProduct(filtered[0].name);
+    if (filtered.length > 0 && selectedProduct && !filtered.find((p) => p.name === selectedProduct))
+      setSelectedProduct(filtered[0].name);
+  }, [filtered, selectedProduct]);
 
-  // Stats
-  const stats = useMemo(() => {
-    if (!data) return null;
-    const total = data.productMaster.length;
-    const hasPricing = data.productMaster.filter((p) => p.HasPriceList === "Yes").length;
-    const missingPricing = total - hasPricing;
-    const missingCells = data.priceList.filter((r) => r.MaxB2C === "" || r.MinB2B === "").length;
-    const repairCosts = data.repairLog
-      .map((r) => parseFloat(r.Cost))
-      .filter((c) => !isNaN(c) && c > 0);
-    const totalRepairCost = repairCosts.reduce((a, b) => a + b, 0);
-    const avgRepairCost = repairCosts.length ? Math.round(totalRepairCost / repairCosts.length) : 0;
-
-    // top repaired products
-    const repairCount = new Map<string, number>();
-    data.repairLog.forEach((r) => {
-      if (r.Product && !r.Product.includes("REVIEW"))
-        repairCount.set(r.Product, (repairCount.get(r.Product) ?? 0) + 1);
-    });
-    const topRepaired = Array.from(repairCount.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5);
-
-    return { total, hasPricing, missingPricing, missingCells, totalRepairCost, avgRepairCost, repairCount: data.repairLog.length, topRepaired };
-  }, [data]);
+  const activeProduct = useMemo(
+    () => filtered.find((p) => p.name === selectedProduct) ?? null,
+    [filtered, selectedProduct]
+  );
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4" />
-        <p className="text-slate-500 text-sm">Loading spare parts data...</p>
-      </div>
+      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600" />
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header */}
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+
+      {/* ── Header ── */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Package size={20} className="text-indigo-600" />
+            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
+              <Package size={16} className="text-white" />
+            </div>
             <div>
-              <h1 className="text-lg font-bold text-slate-900">Spare Parts Catalog</h1>
-              <p className="text-xs text-slate-400">Price List · Product Master · Repair History</p>
+              <h1 className="text-sm font-bold text-slate-900">Spare Parts Price List</h1>
+              <p className="text-xs text-slate-400">UBOARD & TYGATEC · Repair Pricing Reference</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => router.push("/")}
-              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition"
-            >
+            <button onClick={() => router.push("/")}
+              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition">
               <LayoutDashboard size={13} /> Dashboard
             </button>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-600 transition"
-            >
+            <button onClick={handleLogout}
+              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-600 transition">
               <LogOut size={13} /> Sign Out
             </button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-5 space-y-5">
+      <div className="flex flex-1 overflow-hidden max-w-screen-2xl mx-auto w-full px-4 sm:px-6 py-5 gap-5">
 
-        {/* Stats row */}
-        {stats && (
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-            <StatCard label="Total Products" value={stats.total} color="slate" />
-            <StatCard label="With Pricing" value={stats.hasPricing} color="green" sub={`of ${stats.total} products`} />
-            <StatCard label="Missing Pricing" value={stats.missingPricing} color="orange" sub="need price list" />
-            <StatCard label="Missing Cells" value={stats.missingCells} color="red" sub="yellow cells to fill" />
-            <StatCard label="Avg Repair Cost" value={`₹${stats.avgRepairCost.toLocaleString()}`} color="purple" sub={`across ${stats.repairCount} repairs`} />
-          </div>
-        )}
+        {/* ── LEFT: product list ── */}
+        <aside className="w-72 shrink-0 flex flex-col gap-3">
 
-        {/* Missing pricing alert */}
-        {stats && stats.missingPricing > 0 && (
-          <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
-            <AlertCircle size={16} className="text-amber-600 mt-0.5 shrink-0" />
-            <div>
-              <p className="text-sm font-medium text-amber-800">
-                {stats.missingPricing} products have no price list yet
-              </p>
-              <p className="text-xs text-amber-600 mt-0.5">
-                Tygatec products are highest priority — most repairs, zero pricing. Use the filter below to see them.
-              </p>
+          {/* Search + brand filter */}
+          <div className="bg-white rounded-xl border border-slate-200 p-3 space-y-2">
+            <div className="relative">
+              <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search product or part…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-8 pr-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
             </div>
-            <button
-              onClick={() => { setFilterBrand("Tygatec"); setFilterMissing(false); setPage(1); }}
-              className="ml-auto text-xs px-3 py-1 bg-amber-100 text-amber-700 rounded-lg hover:bg-amber-200 transition whitespace-nowrap"
-            >
-              Show Tygatec
-            </button>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
-          {/* Price List Table */}
-          <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200 p-4">
-            <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-              <div>
-                <h2 className="text-sm font-semibold text-slate-700">Price List</h2>
-                <p className="text-xs text-slate-400">{filtered.length} parts · Min = B2B (dealer) · Max = B2C (customer)</p>
-              </div>
-              <div className="relative">
-                <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Search product or part..."
-                  value={search}
-                  onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                  className="pl-8 pr-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 w-52"
-                />
-              </div>
-            </div>
-
-            {/* Filters */}
-            <div className="flex flex-wrap gap-2 mb-3 pb-3 border-b border-slate-100">
-              <TinySelect label="Product" value={filterProduct} options={["All", ...products.slice(1)]} onChange={(v) => { setFilterProduct(v); setPage(1); }} />
-              <TinySelect label="Brand" value={filterBrand} options={brands} onChange={(v) => { setFilterBrand(v); setPage(1); }} />
-              <label className="flex items-center gap-1.5 text-xs text-slate-500 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={filterMissing}
-                  onChange={(e) => { setFilterMissing(e.target.checked); setPage(1); }}
-                  className="rounded"
-                />
-                Missing prices only
-              </label>
-              {(filterProduct !== "All" || filterBrand !== "All" || filterMissing || search) && (
-                <button
-                  onClick={() => { setFilterProduct("All"); setFilterBrand("All"); setFilterMissing(false); setSearch(""); setPage(1); }}
-                  className="text-xs text-indigo-600 hover:underline"
-                >
-                  Clear
+            <div className="flex gap-1">
+              {BRANDS.map((b) => (
+                <button key={b} onClick={() => setBrand(b)}
+                  className={`flex-1 text-xs py-1 rounded-md font-medium transition ${brand === b ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-500 hover:bg-slate-200"}`}>
+                  {b}
                 </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Product buttons */}
+          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden flex-1">
+            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-3 pt-3 pb-1">
+              {filtered.length} products with pricing
+            </p>
+            <div className="overflow-y-auto max-h-[calc(100vh-320px)]">
+              {filtered.map((p) => (
+                <button
+                  key={p.name}
+                  onClick={() => setSelectedProduct(p.name)}
+                  className={`w-full text-left px-3 py-2.5 border-b border-slate-50 transition flex items-start justify-between gap-2 ${
+                    selectedProduct === p.name
+                      ? "bg-indigo-50 border-l-2 border-l-indigo-500"
+                      : "hover:bg-slate-50"
+                  }`}
+                >
+                  <div className="min-w-0">
+                    <p className={`text-xs font-medium truncate ${selectedProduct === p.name ? "text-indigo-700" : "text-slate-700"}`}>
+                      {p.name}
+                    </p>
+                    <p className="text-[10px] text-slate-400 mt-0.5">{p.pricedRows.length} parts priced</p>
+                  </div>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded shrink-0 mt-0.5 font-medium ${
+                    p.brand === "Tygatec" ? "bg-purple-100 text-purple-600" : "bg-blue-100 text-blue-600"
+                  }`}>{p.brand}</span>
+                </button>
+              ))}
+              {filtered.length === 0 && (
+                <p className="text-xs text-slate-400 p-4 text-center">No products match</p>
               )}
             </div>
-
-            {/* Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="border-b border-slate-100">
-                    {["Product", "Spare Part", "Max — B2C (Customer)", "Min — B2B (Dealer)", "GST"].map((h) => (
-                      <th key={h} className="text-left font-medium text-slate-400 pb-2 pr-4 whitespace-nowrap">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {paged.map((r, i) => {
-                    const missingMax = r.MaxB2C === "";
-                    const missingMin = r.MinB2B === "";
-                    return (
-                      <tr key={i} className="border-b border-slate-50 hover:bg-slate-50 transition">
-                        <td className="py-2 pr-4 font-medium text-slate-800 whitespace-nowrap">{r.Product}</td>
-                        <td className="py-2 pr-4 text-slate-600">{r.SparePart}</td>
-                        <td className="py-2 pr-4">
-                          {missingMax ? (
-                            <span className="px-2 py-0.5 rounded bg-yellow-100 text-yellow-700 text-xs">Missing</span>
-                          ) : (
-                            <span className="font-medium text-slate-800">₹{r.MaxB2C}</span>
-                          )}
-                        </td>
-                        <td className="py-2 pr-4">
-                          {missingMin ? (
-                            <span className="px-2 py-0.5 rounded bg-yellow-100 text-yellow-700 text-xs">Missing</span>
-                          ) : (
-                            <span className="font-medium text-slate-700">₹{r.MinB2B}</span>
-                          )}
-                        </td>
-                        <td className="py-2 pr-4 text-slate-500">{r.GST || "—"}</td>
-                      </tr>
-                    );
-                  })}
-                  {paged.length === 0 && (
-                    <tr><td colSpan={5} className="py-8 text-center text-slate-400">No parts match filters</td></tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
-                <span className="text-xs text-slate-400">Page {page} of {totalPages}</span>
-                <div className="flex gap-1">
-                  <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}
-                    className="p-1 rounded border border-slate-200 disabled:opacity-40 hover:bg-slate-50">
-                    <ChevronLeft size={14} />
-                  </button>
-                  <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}
-                    className="p-1 rounded border border-slate-200 disabled:opacity-40 hover:bg-slate-50">
-                    <ChevronRight size={14} />
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
+        </aside>
 
-          {/* Right sidebar */}
-          <div className="space-y-4">
-            {/* Top repaired products */}
-            {stats && (
-              <div className="bg-white rounded-xl border border-slate-200 p-4">
-                <h3 className="text-sm font-semibold text-slate-700 mb-3">Most Repaired Products</h3>
-                <div className="space-y-2">
-                  {stats.topRepaired.map(([product, count]) => {
-                    const max = stats.topRepaired[0][1];
-                    return (
-                      <div key={product}>
-                        <div className="flex justify-between text-xs mb-0.5">
-                          <span className="text-slate-700 truncate pr-2">{product}</span>
-                          <span className="text-slate-500 shrink-0">{count}</span>
-                        </div>
-                        <div className="h-1.5 bg-slate-100 rounded-full">
-                          <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${(count / max) * 100}%` }} />
-                        </div>
-                      </div>
-                    );
-                  })}
+        {/* ── RIGHT: parts table + missing ── */}
+        <main className="flex-1 flex flex-col gap-4 min-w-0">
+
+          {/* Parts table */}
+          {activeProduct ? (
+            <div className="bg-white rounded-xl border border-slate-200 flex flex-col">
+              {/* Product header */}
+              <div className="px-5 py-4 border-b border-slate-100 flex items-start justify-between flex-wrap gap-3">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h2 className="text-base font-bold text-slate-900">{activeProduct.name}</h2>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                      activeProduct.brand === "Tygatec" ? "bg-purple-100 text-purple-600" : "bg-blue-100 text-blue-600"
+                    }`}>{activeProduct.brand}</span>
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    {activeProduct.pricedRows.length} spare parts with pricing
+                    {activeProduct.missingCount > 0 && (
+                      <span className="ml-2 text-amber-500">· {activeProduct.missingCount} parts missing prices (hidden)</span>
+                    )}
+                  </p>
+                </div>
+
+                {/* Legend */}
+                <div className="flex gap-4 text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-3 h-3 rounded bg-green-500" />
+                    <span className="text-slate-600"><strong>Min (B2B)</strong> — Dealer / In-warranty rate</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-3 h-3 rounded bg-indigo-500" />
+                    <span className="text-slate-600"><strong>Max (B2C)</strong> — Customer / Out-of-warranty rate</span>
+                  </div>
                 </div>
               </div>
-            )}
 
-            {/* Product Master */}
-            {data && (
-              <div className="bg-white rounded-xl border border-slate-200 p-4">
-                <h3 className="text-sm font-semibold text-slate-700 mb-3">Product Master ({data.productMaster.length})</h3>
-                <div className="space-y-1 max-h-80 overflow-y-auto">
-                  {data.productMaster.map((p) => (
-                    <div key={p.Product} className="flex items-center justify-between text-xs py-1 border-b border-slate-50">
-                      <span className="text-slate-700 truncate pr-2">{p.Product}</span>
-                      <div className="flex gap-1 shrink-0">
-                        <span className={`px-1.5 py-0.5 rounded text-xs ${p.HasPriceList === "Yes" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"}`}>
-                          {p.HasPriceList === "Yes" ? "Priced" : "No price"}
-                        </span>
+              {/* Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-100">
+                      <th className="text-left px-5 py-3 font-medium text-slate-500 text-xs">Spare Part</th>
+                      <th className="text-right px-5 py-3 font-medium text-xs w-44">
+                        <span className="text-green-700 bg-green-50 px-2 py-1 rounded-md">Min — B2B</span>
+                      </th>
+                      <th className="text-right px-5 py-3 font-medium text-xs w-44">
+                        <span className="text-indigo-700 bg-indigo-50 px-2 py-1 rounded-md">Max — B2C</span>
+                      </th>
+                      <th className="text-center px-5 py-3 font-medium text-slate-500 text-xs w-24">GST</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {activeProduct.pricedRows.map((r, i) => {
+                      const b2b = fmtRs(r.MinB2B);
+                      const b2c = fmtRs(r.MaxB2C);
+                      const isService = r.SparePart.toLowerCase().includes("service");
+                      return (
+                        <tr key={i} className={`border-b border-slate-50 hover:bg-slate-50 transition ${isService ? "bg-slate-50/50" : ""}`}>
+                          <td className="px-5 py-3 text-slate-800">
+                            {isService
+                              ? <span className="italic text-slate-500">{r.SparePart}</span>
+                              : r.SparePart}
+                          </td>
+                          <td className="px-5 py-3 text-right">
+                            {b2b.val != null
+                              ? <span className="font-semibold text-green-700">{b2b.display}</span>
+                              : <span className="text-slate-300 text-xs">—</span>}
+                          </td>
+                          <td className="px-5 py-3 text-right">
+                            {b2c.val != null
+                              ? <span className="font-bold text-indigo-700 text-base">{b2c.display}</span>
+                              : <span className="text-slate-300 text-xs">—</span>}
+                          </td>
+                          <td className="px-5 py-3 text-center text-xs text-slate-400">
+                            {r.GST || "—"}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Bottom note */}
+              <div className="px-5 py-3 border-t border-slate-100 bg-slate-50/50 rounded-b-xl">
+                <p className="text-xs text-slate-400">
+                  <strong className="text-slate-500">In-warranty repair:</strong> charge customer <strong>₹0</strong>, internal cost = Min (B2B) price. &nbsp;·&nbsp;
+                  <strong className="text-slate-500">Out-of-warranty:</strong> charge customer Max (B2C) price.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-white rounded-xl border border-slate-200 flex items-center justify-center h-64">
+              <div className="text-center text-slate-400">
+                <Package size={32} className="mx-auto mb-2 opacity-30" />
+                <p className="text-sm">Select a product to see its parts pricing</p>
+              </div>
+            </div>
+          )}
+
+          {/* ── Missing pricing section ── */}
+          <div className="bg-white rounded-xl border border-amber-200">
+            <button
+              onClick={() => setExpandMissing((v) => !v)}
+              className="w-full px-5 py-4 flex items-center justify-between text-left"
+            >
+              <div className="flex items-center gap-3">
+                <AlertTriangle size={16} className="text-amber-500 shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-amber-800">
+                    {unpricedProducts.length} products have no pricing yet
+                  </p>
+                  <p className="text-xs text-amber-600">
+                    These have repair history but no Min/Max prices — add them to the Price List
+                  </p>
+                </div>
+              </div>
+              <ChevronDown size={16} className={`text-amber-400 transition-transform ${expandMissing ? "rotate-180" : ""}`} />
+            </button>
+
+            {expandMissing && (
+              <div className="border-t border-amber-100 px-5 pb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mt-3">
+                  {unpricedProducts.map((p) => (
+                    <div key={p.Product} className="flex items-center justify-between px-3 py-2 bg-amber-50 rounded-lg border border-amber-100">
+                      <div>
+                        <p className="text-xs font-medium text-slate-700">{p.Product}</p>
+                        <p className="text-[10px] text-slate-400">{p.Brand}</p>
                       </div>
+                      <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
+                        {p.repairs} repairs
+                      </span>
                     </div>
                   ))}
                 </div>
+                <p className="text-xs text-amber-600 mt-3 border-t border-amber-100 pt-3">
+                  Priority order: most repairs first. Add Min (B2B) + Max (B2C) prices to the spreadsheet,
+                  then share the updated file to get them added here.
+                </p>
               </div>
             )}
           </div>
-        </div>
-      </main>
+
+          {/* Summary cards */}
+          <div className="grid grid-cols-3 gap-3">
+            <SumCard
+              icon={<CheckCircle2 size={18} className="text-green-600" />}
+              label="Products with full pricing"
+              value={pricedProducts.length.toString()}
+              bg="bg-green-50 border-green-200"
+              text="text-green-700"
+            />
+            <SumCard
+              icon={<AlertTriangle size={18} className="text-amber-500" />}
+              label="Products missing pricing"
+              value={unpricedProducts.length.toString()}
+              bg="bg-amber-50 border-amber-200"
+              text="text-amber-700"
+            />
+            <SumCard
+              icon={<IndianRupee size={18} className="text-indigo-600" />}
+              label="Total spare parts listed"
+              value={pricedProducts.reduce((s, p) => s + p.pricedRows.length, 0).toString()}
+              bg="bg-indigo-50 border-indigo-200"
+              text="text-indigo-700"
+            />
+          </div>
+
+        </main>
+      </div>
     </div>
   );
 }
 
-function StatCard({ label, value, color, sub }: { label: string; value: string | number; color: string; sub?: string }) {
-  const colors: Record<string, string> = {
-    slate:  "bg-slate-50 border-slate-200 text-slate-900",
-    green:  "bg-green-50 border-green-200 text-green-700",
-    orange: "bg-orange-50 border-orange-200 text-orange-700",
-    red:    "bg-red-50 border-red-200 text-red-700",
-    purple: "bg-purple-50 border-purple-200 text-purple-700",
-  };
+function SumCard({ icon, label, value, bg, text }: {
+  icon: React.ReactNode; label: string; value: string; bg: string; text: string;
+}) {
   return (
-    <div className={`rounded-xl border px-4 py-4 ${colors[color] ?? colors.slate}`}>
-      <p className="text-xs font-medium opacity-70 mb-1">{label}</p>
-      <p className="text-2xl font-bold">{typeof value === "number" ? value.toLocaleString() : value}</p>
-      {sub && <p className="text-xs opacity-60 mt-0.5">{sub}</p>}
-    </div>
-  );
-}
-
-function TinySelect({ label, value, options, onChange }: { label: string; value: string; options: string[]; onChange: (v: string) => void }) {
-  return (
-    <div className="flex items-center gap-1">
-      <span className="text-xs text-slate-400">{label}:</span>
-      <select value={value} onChange={(e) => onChange(e.target.value)}
-        className="text-xs border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-400">
-        {options.map((o) => <option key={o} value={o}>{o}</option>)}
-      </select>
+    <div className={`rounded-xl border px-4 py-3 flex items-center gap-3 ${bg}`}>
+      {icon}
+      <div>
+        <p className={`text-xl font-bold ${text}`}>{value}</p>
+        <p className="text-xs text-slate-500">{label}</p>
+      </div>
     </div>
   );
 }
