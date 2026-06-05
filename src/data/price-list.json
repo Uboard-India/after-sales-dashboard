@@ -1181,5 +1181,768 @@
         "MaxB2C":  "2000",
         "MinB2B":  "1200",
         "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Classic Lite 6.5",
+        "SparePart":  "Uboard Battery with 3 months warranty",
+        "MaxB2C":  "3800",
+        "MinB2B":  "2800",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Classic Lite 6.5",
+        "SparePart":  "Chinese battery without warranty",
+        "MaxB2C":  "3000",
+        "MinB2B":  "2200",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Classic Lite 6.5",
+        "SparePart":  "Motor each",
+        "MaxB2C":  "2500",
+        "MinB2B":  "2000",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Classic Lite 6.5",
+        "SparePart":  "Charger with warranty",
+        "MaxB2C":  "2380",
+        "MinB2B":  "1250",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Classic Lite 6.5",
+        "SparePart":  "Charger without warranty",
+        "MaxB2C":  "1430",
+        "MinB2B":  "700",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Classic Lite 6.5",
+        "SparePart":  "Charging Slot",
+        "MaxB2C":  "600",
+        "MinB2B":  "350",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Classic Lite 6.5",
+        "SparePart":  "Power Button",
+        "MaxB2C":  "600",
+        "MinB2B":  "350",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Classic Lite 6.5",
+        "SparePart":  "Motherboard with app",
+        "MaxB2C":  "5000",
+        "MinB2B":  "4000",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Classic Lite 6.5",
+        "SparePart":  "Motherboard without app",
+        "MaxB2C":  "4000",
+        "MinB2B":  "3000",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Classic Lite 6.5",
+        "SparePart":  "Sensor each",
+        "MaxB2C":  "1200",
+        "MinB2B":  "800",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Classic Lite 6.5",
+        "SparePart":  "Body",
+        "MaxB2C":  "3000",
+        "MinB2B":  "2500",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Classic Lite 6.5",
+        "SparePart":  "Bluetooth",
+        "MaxB2C":  "1250",
+        "MinB2B":  "900",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Classic Lite 6.5",
+        "SparePart":  "Speaker",
+        "MaxB2C":  "600",
+        "MinB2B":  "500",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Classic Lite 6.5",
+        "SparePart":  "LED Light each",
+        "MaxB2C":  "300",
+        "MinB2B":  "300",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Classic Lite 6.5",
+        "SparePart":  "Footpads each",
+        "MaxB2C":  "1200",
+        "MinB2B":  "1200",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Classic Lite 6.5",
+        "SparePart":  "Service Charges",
+        "MaxB2C":  "650",
+        "MinB2B":  "650",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Hybrid 6.5",
+        "SparePart":  "Uboard Battery with 3 months warranty",
+        "MaxB2C":  "3800",
+        "MinB2B":  "2800",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Hybrid 6.5",
+        "SparePart":  "Chinese battery without warranty",
+        "MaxB2C":  "3000",
+        "MinB2B":  "2200",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Hybrid 6.5",
+        "SparePart":  "Motor each",
+        "MaxB2C":  "2500",
+        "MinB2B":  "2000",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Hybrid 6.5",
+        "SparePart":  "Charger with warranty",
+        "MaxB2C":  "2380",
+        "MinB2B":  "1250",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Hybrid 6.5",
+        "SparePart":  "Charger without warranty",
+        "MaxB2C":  "1430",
+        "MinB2B":  "700",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Hybrid 6.5",
+        "SparePart":  "Charging Slot",
+        "MaxB2C":  "600",
+        "MinB2B":  "350",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Hybrid 6.5",
+        "SparePart":  "Power Button",
+        "MaxB2C":  "600",
+        "MinB2B":  "350",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Hybrid 6.5",
+        "SparePart":  "Motherboard with app",
+        "MaxB2C":  "5000",
+        "MinB2B":  "4000",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Hybrid 6.5",
+        "SparePart":  "Motherboard without app",
+        "MaxB2C":  "4000",
+        "MinB2B":  "3000",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Hybrid 6.5",
+        "SparePart":  "Sensor each",
+        "MaxB2C":  "1200",
+        "MinB2B":  "800",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Hybrid 6.5",
+        "SparePart":  "Body",
+        "MaxB2C":  "3000",
+        "MinB2B":  "2500",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Hybrid 6.5",
+        "SparePart":  "Bluetooth",
+        "MaxB2C":  "1250",
+        "MinB2B":  "900",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Hybrid 6.5",
+        "SparePart":  "Speaker",
+        "MaxB2C":  "600",
+        "MinB2B":  "500",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Hybrid 6.5",
+        "SparePart":  "LED Light each",
+        "MaxB2C":  "300",
+        "MinB2B":  "300",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Hybrid 6.5",
+        "SparePart":  "Footpads each",
+        "MaxB2C":  "1200",
+        "MinB2B":  "1200",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Hybrid 6.5",
+        "SparePart":  "Service Charges",
+        "MaxB2C":  "650",
+        "MinB2B":  "650",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T1",
+        "SparePart":  "Uboard Battery with 3 months warranty",
+        "MaxB2C":  "3800",
+        "MinB2B":  "2800",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T1",
+        "SparePart":  "Chinese battery without warranty",
+        "MaxB2C":  "3000",
+        "MinB2B":  "2200",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T1",
+        "SparePart":  "Motor each",
+        "MaxB2C":  "2500",
+        "MinB2B":  "2000",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T1",
+        "SparePart":  "Charger with warranty",
+        "MaxB2C":  "2380",
+        "MinB2B":  "1250",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T1",
+        "SparePart":  "Charger without warranty",
+        "MaxB2C":  "1430",
+        "MinB2B":  "700",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T1",
+        "SparePart":  "Charging Slot",
+        "MaxB2C":  "600",
+        "MinB2B":  "350",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T1",
+        "SparePart":  "Power Button",
+        "MaxB2C":  "600",
+        "MinB2B":  "350",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T1",
+        "SparePart":  "Motherboard with app",
+        "MaxB2C":  "5000",
+        "MinB2B":  "4000",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T1",
+        "SparePart":  "Motherboard without app",
+        "MaxB2C":  "4000",
+        "MinB2B":  "3000",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T1",
+        "SparePart":  "Sensor each",
+        "MaxB2C":  "1200",
+        "MinB2B":  "800",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T1",
+        "SparePart":  "Body",
+        "MaxB2C":  "3000",
+        "MinB2B":  "2500",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T1",
+        "SparePart":  "Bluetooth",
+        "MaxB2C":  "1250",
+        "MinB2B":  "900",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T1",
+        "SparePart":  "Speaker",
+        "MaxB2C":  "600",
+        "MinB2B":  "500",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T1",
+        "SparePart":  "LED Light each",
+        "MaxB2C":  "300",
+        "MinB2B":  "300",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T1",
+        "SparePart":  "Footpads each",
+        "MaxB2C":  "1200",
+        "MinB2B":  "1200",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T1",
+        "SparePart":  "Service Charges",
+        "MaxB2C":  "650",
+        "MinB2B":  "650",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T2",
+        "SparePart":  "Uboard Battery with 3 months warranty",
+        "MaxB2C":  "3800",
+        "MinB2B":  "2800",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T2",
+        "SparePart":  "Chinese battery without warranty",
+        "MaxB2C":  "3000",
+        "MinB2B":  "2200",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T2",
+        "SparePart":  "Motor each",
+        "MaxB2C":  "2500",
+        "MinB2B":  "2000",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T2",
+        "SparePart":  "Charger with warranty",
+        "MaxB2C":  "2380",
+        "MinB2B":  "1250",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T2",
+        "SparePart":  "Charger without warranty",
+        "MaxB2C":  "1430",
+        "MinB2B":  "700",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T2",
+        "SparePart":  "Charging Slot",
+        "MaxB2C":  "600",
+        "MinB2B":  "350",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T2",
+        "SparePart":  "Power Button",
+        "MaxB2C":  "600",
+        "MinB2B":  "350",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T2",
+        "SparePart":  "Motherboard with app",
+        "MaxB2C":  "5000",
+        "MinB2B":  "4000",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T2",
+        "SparePart":  "Motherboard without app",
+        "MaxB2C":  "4000",
+        "MinB2B":  "3000",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T2",
+        "SparePart":  "Sensor each",
+        "MaxB2C":  "1200",
+        "MinB2B":  "800",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T2",
+        "SparePart":  "Body",
+        "MaxB2C":  "3000",
+        "MinB2B":  "2500",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T2",
+        "SparePart":  "Bluetooth",
+        "MaxB2C":  "1250",
+        "MinB2B":  "900",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T2",
+        "SparePart":  "Speaker",
+        "MaxB2C":  "600",
+        "MinB2B":  "500",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T2",
+        "SparePart":  "LED Light each",
+        "MaxB2C":  "300",
+        "MinB2B":  "300",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T2",
+        "SparePart":  "Footpads each",
+        "MaxB2C":  "1200",
+        "MinB2B":  "1200",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T2",
+        "SparePart":  "Service Charges",
+        "MaxB2C":  "650",
+        "MinB2B":  "650",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T6",
+        "SparePart":  "Chassis",
+        "MaxB2C":  "1800",
+        "MinB2B":  "1800",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T6",
+        "SparePart":  "Uboard Battery with 3 months warranty",
+        "MaxB2C":  "3800",
+        "MinB2B":  "2800",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T6",
+        "SparePart":  "Chinese battery without warranty",
+        "MaxB2C":  "3000",
+        "MinB2B":  "2200",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T6",
+        "SparePart":  "Motor each",
+        "MaxB2C":  "3500",
+        "MinB2B":  "3500",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T6",
+        "SparePart":  "Charger with warranty",
+        "MaxB2C":  "2380",
+        "MinB2B":  "1250",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T6",
+        "SparePart":  "Charger without warranty",
+        "MaxB2C":  "1430",
+        "MinB2B":  "700",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T6",
+        "SparePart":  "Charging Slot",
+        "MaxB2C":  "600",
+        "MinB2B":  "350",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T6",
+        "SparePart":  "Power Button",
+        "MaxB2C":  "600",
+        "MinB2B":  "350",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T6",
+        "SparePart":  "Motherboard with app",
+        "MaxB2C":  "5000",
+        "MinB2B":  "4000",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T6",
+        "SparePart":  "Motherboard without app",
+        "MaxB2C":  "4000",
+        "MinB2B":  "3000",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T6",
+        "SparePart":  "Sensor each",
+        "MaxB2C":  "1200",
+        "MinB2B":  "800",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T6",
+        "SparePart":  "Body",
+        "MaxB2C":  "5000",
+        "MinB2B":  "3800",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T6",
+        "SparePart":  "Mudgaurd each",
+        "MaxB2C":  "950",
+        "MinB2B":  "950",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T6",
+        "SparePart":  "Bluetooth",
+        "MaxB2C":  "1250",
+        "MinB2B":  "900",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T6",
+        "SparePart":  "Speaker",
+        "MaxB2C":  "600",
+        "MinB2B":  "500",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T6",
+        "SparePart":  "LED Light each",
+        "MaxB2C":  "300",
+        "MinB2B":  "300",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T6",
+        "SparePart":  "Footpads each",
+        "MaxB2C":  "1200",
+        "MinB2B":  "1200",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T6",
+        "SparePart":  "Service Charges",
+        "MaxB2C":  "650",
+        "MinB2B":  "650",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T9",
+        "SparePart":  "Middle big screw",
+        "MaxB2C":  "450",
+        "MinB2B":  "450",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T9",
+        "SparePart":  "horn \u0026 switch set",
+        "MaxB2C":  "1500",
+        "MinB2B":  "1500",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T9",
+        "SparePart":  "Controller",
+        "MaxB2C":  "4800",
+        "MinB2B":  "4800",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T9",
+        "SparePart":  "Uboard Battery with 3 months warranty",
+        "MaxB2C":  "3800",
+        "MinB2B":  "2800",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T9",
+        "SparePart":  "Chinese battery without warranty",
+        "MaxB2C":  "3000",
+        "MinB2B":  "2200",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T9",
+        "SparePart":  "front wheel with motor",
+        "MaxB2C":  "4500",
+        "MinB2B":  "4500",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T9",
+        "SparePart":  "Charger with warranty",
+        "MaxB2C":  "2380",
+        "MinB2B":  "1250",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T9",
+        "SparePart":  "Charger without warranty",
+        "MaxB2C":  "1430",
+        "MinB2B":  "700",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T9",
+        "SparePart":  "Charging Slot",
+        "MaxB2C":  "600",
+        "MinB2B":  "350",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T9",
+        "SparePart":  "Power Button",
+        "MaxB2C":  "600",
+        "MinB2B":  "350",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T9",
+        "SparePart":  "Controller",
+        "MaxB2C":  "4000",
+        "MinB2B":  "2800",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T9",
+        "SparePart":  "Rear Wheel only each (PU Wheels)",
+        "MaxB2C":  "600",
+        "MinB2B":  "350",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T9",
+        "SparePart":  "Rear wheel with plastic set (caster)",
+        "MaxB2C":  "1250",
+        "MinB2B":  "800",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T9",
+        "SparePart":  "Seat",
+        "MaxB2C":  "1200",
+        "MinB2B":  "800",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T9",
+        "SparePart":  "Body",
+        "MaxB2C":  "5500",
+        "MinB2B":  "4500",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T9",
+        "SparePart":  "Bluetooth",
+        "MaxB2C":  "1250",
+        "MinB2B":  "900",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T9",
+        "SparePart":  "Speaker",
+        "MaxB2C":  "600",
+        "MinB2B":  "500",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T9",
+        "SparePart":  "Throttle",
+        "MaxB2C":  "3500",
+        "MinB2B":  "2500",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T9",
+        "SparePart":  "Footpads each",
+        "MaxB2C":  "1200",
+        "MinB2B":  "1200",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T9",
+        "SparePart":  "Back frame(peel)",
+        "MaxB2C":  "3500",
+        "MinB2B":  "2500",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T9",
+        "SparePart":  "Middle rod",
+        "MaxB2C":  "1500",
+        "MinB2B":  "1500",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T9",
+        "SparePart":  "Handle grips",
+        "MaxB2C":  "500",
+        "MinB2B":  "500",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T9",
+        "SparePart":  "Chassis",
+        "MaxB2C":  "3000",
+        "MinB2B":  "3000",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T9",
+        "SparePart":  "Brake Switch",
+        "MaxB2C":  "1200",
+        "MinB2B":  "1200",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T9",
+        "SparePart":  "Speed Switch",
+        "MaxB2C":  "1200",
+        "MinB2B":  "1200",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T9",
+        "SparePart":  "Brake lever set",
+        "MaxB2C":  "1200",
+        "MinB2B":  "1200",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec T9",
+        "SparePart":  "Service Charges",
+        "MaxB2C":  "3000",
+        "MinB2B":  "650",
+        "GST":  "18%"
     }
 ]

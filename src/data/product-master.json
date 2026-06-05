@@ -56,13 +56,13 @@
     {
         "Product":  "Tygatec T1",
         "Brand":  "Tygatec",
-        "HasPriceList":  "No",
+        "HasPriceList":  "Yes",
         "HasRepairHistory":  "Yes (24)"
     },
     {
         "Product":  "Tygatec T2",
         "Brand":  "Tygatec",
-        "HasPriceList":  "No",
+        "HasPriceList":  "Yes",
         "HasRepairHistory":  "Yes (30)"
     },
     {
@@ -74,13 +74,13 @@
     {
         "Product":  "Tygatec T6",
         "Brand":  "Tygatec",
-        "HasPriceList":  "No",
+        "HasPriceList":  "Yes",
         "HasRepairHistory":  "Yes (16)"
     },
     {
         "Product":  "Tygatec T9",
         "Brand":  "Tygatec",
-        "HasPriceList":  "No",
+        "HasPriceList":  "Yes",
         "HasRepairHistory":  "Yes (3)"
     },
     {
@@ -110,7 +110,7 @@
     {
         "Product":  "Uboard Classic Lite 6.5",
         "Brand":  "Uboard",
-        "HasPriceList":  "No",
+        "HasPriceList":  "Yes",
         "HasRepairHistory":  "Yes (43)"
     },
     {
@@ -152,7 +152,7 @@
     {
         "Product":  "Uboard Hybrid 6.5",
         "Brand":  "Uboard",
-        "HasPriceList":  "No",
+        "HasPriceList":  "Yes",
         "HasRepairHistory":  "Yes (6)"
     },
     {
