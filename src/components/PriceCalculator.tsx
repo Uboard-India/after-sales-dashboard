@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { X, Calculator, IndianRupee, ChevronDown } from "lucide-react";
+import { X, Calculator, IndianRupee, ChevronDown, Plus, Minus } from "lucide-react";
 import type { SparePartsData, PriceListRow } from "@/lib/spareparts-types";
 
 interface Props {
@@ -10,24 +10,43 @@ interface Props {
 }
 
 function parseNum(s: string): number | null {
-  if (!s || s.toLowerCase() === "na" || s === "") return null;
+  if (!s || s.toLowerCase() === "na") return null;
   const n = parseFloat(s.replace(/[^0-9.]/g, ""));
   return isNaN(n) ? null : n;
 }
 
-function parseGST(s: string): number {
-  if (!s) return 0;
-  const n = parseFloat(s.replace(/[^0-9.]/g, ""));
-  return isNaN(n) ? 0 : n;
+/** Returns the final price for a part row given B2B/B2C.
+ *  GST column logic:
+ *  - "included" (any case) → price is as-is
+ *  - has a % number (e.g. "18%") → add that % on top
+ *  - empty / unknown → price as-is, no GST added
+ */
+function calcPrice(row: PriceListRow, type: "B2C" | "B2B"): {
+  base: number | null;
+  gstPct: number;
+  gstIncluded: boolean;
+  final: number | null;
+  gstAmount: number;
+} {
+  const rawStr = type === "B2C" ? row.MaxB2C : row.MinB2B;
+  const base = parseNum(rawStr);
+  const gstRaw = (row.GST ?? "").trim().toLowerCase();
+  const gstIncluded = gstRaw === "included" || gstRaw === "gst included";
+  const gstPct = gstIncluded ? 0 : (parseNum(row.GST) ?? 0);
+
+  if (base == null) return { base: null, gstPct, gstIncluded, final: null, gstAmount: 0 };
+
+  const gstAmount = Math.round(base * gstPct / 100);
+  const final = base + gstAmount;
+  return { base, gstPct, gstIncluded, final, gstAmount };
 }
 
 export default function PriceCalculator({ open, onClose }: Props) {
-  const [data, setData] = useState<SparePartsData | null>(null);
-  const [brand, setBrand] = useState("");
-  const [product, setProduct] = useState("");
-  const [sparePart, setSparePart] = useState("");
+  const [data, setData]           = useState<SparePartsData | null>(null);
+  const [brand, setBrand]         = useState("");
+  const [product, setProduct]     = useState("");
   const [priceType, setPriceType] = useState<"B2C" | "B2B">("B2C");
-  const [gstMode, setGstMode] = useState<"included" | "add">("included");
+  const [selected, setSelected]   = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (open && !data) {
@@ -35,19 +54,16 @@ export default function PriceCalculator({ open, onClose }: Props) {
     }
   }, [open, data]);
 
-  // Reset downstream on parent change
-  useEffect(() => { setProduct(""); setSparePart(""); }, [brand]);
-  useEffect(() => { setSparePart(""); }, [product]);
+  useEffect(() => { setProduct(""); setSelected(new Set()); }, [brand]);
+  useEffect(() => { setSelected(new Set()); }, [product]);
 
   const brands = useMemo(() => {
     if (!data) return [];
     const s = new Set(
       data.priceList
         .filter(r => !r.Product.startsWith("REVIEW"))
-        .map(r => {
-          const pm = data.productMaster.find(p => p.Product === r.Product);
-          return pm?.Brand ?? "";
-        }).filter(Boolean)
+        .map(r => data.productMaster.find(p => p.Product === r.Product)?.Brand ?? "")
+        .filter(Boolean)
     );
     return Array.from(s).sort();
   }, [data]);
@@ -58,8 +74,7 @@ export default function PriceCalculator({ open, onClose }: Props) {
       data.priceList
         .filter(r => {
           if (r.Product.startsWith("REVIEW")) return false;
-          const pm = data.productMaster.find(p => p.Product === r.Product);
-          return pm?.Brand === brand;
+          return data.productMaster.find(p => p.Product === r.Product)?.Brand === brand;
         })
         .map(r => r.Product)
     );
@@ -73,57 +88,45 @@ export default function PriceCalculator({ open, onClose }: Props) {
       .sort((a, b) => a.SparePart.localeCompare(b.SparePart));
   }, [data, product]);
 
-  const selectedRow: PriceListRow | null = useMemo(
-    () => parts.find(r => r.SparePart === sparePart) ?? null,
-    [parts, sparePart]
-  );
+  function togglePart(name: string) {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      return next;
+    });
+  }
 
-  const result = useMemo(() => {
-    if (!selectedRow) return null;
-    const rawStr = priceType === "B2C" ? selectedRow.MaxB2C : selectedRow.MinB2B;
-    const base = parseNum(rawStr);
-    const gstPct = parseGST(selectedRow.GST);
+  // Computed line items for selected parts
+  const lineItems = useMemo(() => {
+    return parts
+      .filter(r => selected.has(r.SparePart))
+      .map(r => {
+        const c = calcPrice(r, priceType);
+        return { ...r, ...c };
+      });
+  }, [parts, selected, priceType]);
 
-    if (base == null) return { unavailable: true, priceType, rawStr };
-
-    let final: number;
-    let gstAmount: number;
-
-    if (gstMode === "add") {
-      gstAmount = Math.round(base * gstPct / 100);
-      final = base + gstAmount;
-    } else {
-      // price as-is (already includes GST or no GST applicable)
-      final = base;
-      gstAmount = gstPct > 0 ? Math.round(base - base / (1 + gstPct / 100)) : 0;
-    }
-
-    return {
-      unavailable: false,
-      base,
-      gstPct,
-      gstAmount,
-      final,
-      priceType,
-      label: priceType === "B2C" ? "Customer Price (B2C)" : "Dealer / In-warranty Price (B2B)",
-    };
-  }, [selectedRow, priceType, gstMode]);
+  const totalBase  = lineItems.reduce((s, r) => s + (r.base  ?? 0), 0);
+  const totalGST   = lineItems.reduce((s, r) => s + r.gstAmount, 0);
+  const totalFinal = lineItems.reduce((s, r) => s + (r.final ?? 0), 0);
+  const hasItems   = lineItems.length > 0;
 
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 shrink-0">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
               <Calculator size={16} className="text-white" />
             </div>
             <div>
               <h2 className="text-sm font-bold text-slate-900">Price Calculator</h2>
-              <p className="text-[11px] text-slate-400">Select part → get customer price</p>
+              <p className="text-[11px] text-slate-400">Select multiple parts → total price</p>
             </div>
           </div>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition">
@@ -131,143 +134,199 @@ export default function PriceCalculator({ open, onClose }: Props) {
           </button>
         </div>
 
-        <div className="px-5 py-4 space-y-3">
+        <div className="overflow-y-auto flex-1 px-5 py-4 space-y-4">
 
-          {/* Brand */}
-          <CalcSelect
-            label="Brand"
-            value={brand}
-            onChange={setBrand}
-            placeholder="Select brand…"
-            options={brands.map(b => ({ value: b, label: b }))}
-          />
-
-          {/* Product */}
-          <CalcSelect
-            label="Product"
-            value={product}
-            onChange={setProduct}
-            placeholder={brand ? "Select product…" : "Select brand first"}
-            options={products.map(p => ({ value: p, label: p }))}
-            disabled={!brand}
-          />
-
-          {/* Spare Part */}
-          <CalcSelect
-            label="Spare Part"
-            value={sparePart}
-            onChange={setSparePart}
-            placeholder={product ? "Select spare part…" : "Select product first"}
-            options={parts.map(r => ({ value: r.SparePart, label: r.SparePart }))}
-            disabled={!product}
-          />
+          {/* Brand + Product row */}
+          <div className="grid grid-cols-2 gap-3">
+            <CalcSelect
+              label="Brand"
+              value={brand}
+              onChange={setBrand}
+              placeholder="Select brand…"
+              options={brands.map(b => ({ value: b, label: b }))}
+            />
+            <CalcSelect
+              label="Product"
+              value={product}
+              onChange={setProduct}
+              placeholder={brand ? "Select product…" : "Brand first"}
+              options={products.map(p => ({ value: p, label: p }))}
+              disabled={!brand}
+            />
+          </div>
 
           {/* B2B / B2C toggle */}
           <div>
             <label className="text-xs font-medium text-slate-500 block mb-1.5">Customer Type</label>
             <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => setPriceType("B2C")}
-                className={`py-2.5 rounded-xl text-xs font-semibold border-2 transition ${
-                  priceType === "B2C"
-                    ? "border-indigo-600 bg-indigo-600 text-white"
-                    : "border-slate-200 text-slate-500 hover:border-indigo-300"
-                }`}
-              >
-                B2C — Customer
-                <span className="block text-[10px] font-normal opacity-70 mt-0.5">Walk-in / end user</span>
-              </button>
-              <button
-                onClick={() => setPriceType("B2B")}
-                className={`py-2.5 rounded-xl text-xs font-semibold border-2 transition ${
-                  priceType === "B2B"
-                    ? "border-green-600 bg-green-600 text-white"
-                    : "border-slate-200 text-slate-500 hover:border-green-300"
-                }`}
-              >
-                B2B — Dealer
-                <span className="block text-[10px] font-normal opacity-70 mt-0.5">Hamleys / partner</span>
-              </button>
+              {(["B2C", "B2B"] as const).map(t => (
+                <button
+                  key={t}
+                  onClick={() => setPriceType(t)}
+                  className={`py-2 rounded-xl text-xs font-semibold border-2 transition ${
+                    priceType === t
+                      ? t === "B2C"
+                        ? "border-indigo-600 bg-indigo-600 text-white"
+                        : "border-green-600 bg-green-600 text-white"
+                      : "border-slate-200 text-slate-500 hover:border-slate-300"
+                  }`}
+                >
+                  {t === "B2C" ? "B2C — Customer" : "B2B — Dealer"}
+                  <span className="block text-[10px] font-normal opacity-70 mt-0.5">
+                    {t === "B2C" ? "Walk-in / end user" : "Hamleys / in-warranty"}
+                  </span>
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* GST toggle */}
-          <div>
-            <label className="text-xs font-medium text-slate-500 block mb-1.5">GST</label>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => setGstMode("included")}
-                className={`py-2 rounded-xl text-xs font-semibold border-2 transition ${
-                  gstMode === "included"
-                    ? "border-slate-700 bg-slate-700 text-white"
-                    : "border-slate-200 text-slate-500 hover:border-slate-400"
-                }`}
-              >
-                GST Included
-                <span className="block text-[10px] font-normal opacity-70">Price as-is</span>
-              </button>
-              <button
-                onClick={() => setGstMode("add")}
-                className={`py-2 rounded-xl text-xs font-semibold border-2 transition ${
-                  gstMode === "add"
-                    ? "border-orange-500 bg-orange-500 text-white"
-                    : "border-slate-200 text-slate-500 hover:border-orange-300"
-                }`}
-              >
-                + Add GST
-                <span className="block text-[10px] font-normal opacity-70">Add on top</span>
-              </button>
+          {/* Spare Parts checklist */}
+          {product && (
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-medium text-slate-500">
+                  Spare Parts
+                  {selected.size > 0 && (
+                    <span className="ml-1.5 bg-indigo-100 text-indigo-700 text-[10px] px-1.5 py-0.5 rounded-full font-semibold">
+                      {selected.size} selected
+                    </span>
+                  )}
+                </label>
+                {selected.size > 0 && (
+                  <button
+                    onClick={() => setSelected(new Set())}
+                    className="text-[10px] text-slate-400 hover:text-red-500 transition"
+                  >
+                    Clear all
+                  </button>
+                )}
+              </div>
+              <div className="border-2 border-slate-200 rounded-xl overflow-hidden max-h-52 overflow-y-auto">
+                {parts.map((r, i) => {
+                  const c = calcPrice(r, priceType);
+                  const isSelected = selected.has(r.SparePart);
+                  const isService = r.SparePart.toLowerCase().includes("service");
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => togglePart(r.SparePart)}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 border-b border-slate-50 text-left transition ${
+                        isSelected ? "bg-indigo-50" : "hover:bg-slate-50"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className={`w-4 h-4 rounded shrink-0 flex items-center justify-center border-2 transition ${
+                          isSelected ? "bg-indigo-600 border-indigo-600" : "border-slate-300"
+                        }`}>
+                          {isSelected && (
+                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                              <path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          )}
+                        </div>
+                        <span className={`text-xs truncate ${isService ? "italic text-slate-400" : "text-slate-700"}`}>
+                          {r.SparePart}
+                        </span>
+                      </div>
+                      <div className="text-right shrink-0 ml-2">
+                        {c.final != null ? (
+                          <span className={`text-xs font-semibold ${isSelected ? "text-indigo-700" : "text-slate-600"}`}>
+                            ₹{c.final.toLocaleString("en-IN")}
+                            {c.gstPct > 0 && (
+                              <span className="text-[10px] font-normal text-slate-400 ml-1">+{c.gstPct}% GST</span>
+                            )}
+                            {c.gstIncluded && (
+                              <span className="text-[10px] font-normal text-slate-400 ml-1">GST incl.</span>
+                            )}
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-slate-300">—</span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Line items */}
+          {lineItems.length > 0 && (
+            <div className="bg-slate-50 rounded-xl p-3 space-y-1.5">
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Selected Parts</p>
+              {lineItems.map((r, i) => (
+                <div key={i} className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <button
+                      onClick={() => togglePart(r.SparePart)}
+                      className="text-slate-300 hover:text-red-400 transition shrink-0"
+                    >
+                      <Minus size={12} />
+                    </button>
+                    <span className="text-slate-600 truncate">{r.SparePart}</span>
+                  </div>
+                  <div className="text-right shrink-0 ml-2">
+                    {r.final != null ? (
+                      <span className="font-medium text-slate-800">₹{r.final.toLocaleString("en-IN")}</span>
+                    ) : (
+                      <span className="text-slate-300">N/A</span>
+                    )}
+                    {r.gstPct > 0 && (
+                      <span className="text-[10px] text-slate-400 ml-1">(+{r.gstPct}%)</span>
+                    )}
+                    {r.gstIncluded && (
+                      <span className="text-[10px] text-slate-400 ml-1">(incl.)</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+              {totalGST > 0 && (
+                <div className="flex justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-200 mt-1">
+                  <span>Base: ₹{totalBase.toLocaleString("en-IN")}</span>
+                  <span>GST: +₹{totalGST.toLocaleString("en-IN")}</span>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Result */}
-        <div className={`mx-5 mb-5 rounded-2xl p-4 transition-all ${
-          result && !result.unavailable
+        {/* Total */}
+        <div className={`mx-5 mb-5 shrink-0 rounded-2xl p-4 ${
+          hasItems
             ? priceType === "B2C" ? "bg-indigo-600" : "bg-green-600"
             : "bg-slate-100"
         }`}>
-          {!selectedRow ? (
-            <div className="text-center text-slate-400 py-2">
-              <IndianRupee size={28} className="mx-auto mb-1 opacity-30" />
-              <p className="text-xs">Select all options above</p>
+          {!product ? (
+            <div className="text-center text-slate-400 py-1">
+              <IndianRupee size={24} className="mx-auto mb-1 opacity-30" />
+              <p className="text-xs">Select brand and product to start</p>
             </div>
-          ) : result?.unavailable ? (
-            <div className="text-center py-2">
-              <p className="text-sm font-semibold text-slate-600">Price not available</p>
-              <p className="text-xs text-slate-400 mt-1">
-                {result.priceType === "B2C" ? "B2C (Max)" : "B2B (Min)"} price not set for this part
-              </p>
+          ) : !hasItems ? (
+            <div className="text-center text-slate-400 py-1">
+              <Plus size={20} className="mx-auto mb-1 opacity-30" />
+              <p className="text-xs">Tap parts above to add them</p>
             </div>
-          ) : result && !result.unavailable && result.final != null ? (
-            <div>
-              <p className="text-xs text-white/70 mb-1">{result.label}</p>
-              <div className="flex items-end justify-between">
-                <div>
-                  <p className="text-4xl font-extrabold text-white">
-                    ₹{result.final.toLocaleString("en-IN")}
+          ) : (
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-white/70 mb-0.5">
+                  {priceType === "B2C" ? "Customer Total (B2C)" : "Dealer Total (B2B)"}
+                  {" · "}{lineItems.length} part{lineItems.length !== 1 ? "s" : ""}
+                </p>
+                <p className="text-4xl font-extrabold text-white">
+                  ₹{totalFinal.toLocaleString("en-IN")}
+                </p>
+                {totalGST > 0 && (
+                  <p className="text-xs text-white/60 mt-0.5">
+                    ₹{totalBase.toLocaleString("en-IN")} + ₹{totalGST.toLocaleString("en-IN")} GST
                   </p>
-                  {gstMode === "add" && result.gstPct > 0 && result.base != null && (
-                    <p className="text-xs text-white/70 mt-1">
-                      ₹{result.base.toLocaleString("en-IN")} + GST {result.gstPct}% (₹{result.gstAmount?.toLocaleString("en-IN")})
-                    </p>
-                  )}
-                  {gstMode === "included" && result.gstPct > 0 && (
-                    <p className="text-xs text-white/70 mt-1">
-                      GST {result.gstPct}% included · ₹{result.gstAmount?.toLocaleString("en-IN")} tax component
-                    </p>
-                  )}
-                  {result.gstPct === 0 && (
-                    <p className="text-xs text-white/70 mt-1">No GST applicable</p>
-                  )}
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-white/60">{sparePart}</p>
-                  <p className="text-xs text-white/50">{product}</p>
-                </div>
+                )}
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-white/50">{product}</p>
               </div>
             </div>
-          ) : null}
+          )}
         </div>
       </div>
     </div>
@@ -275,12 +334,8 @@ export default function PriceCalculator({ open, onClose }: Props) {
 }
 
 function CalcSelect({ label, value, onChange, placeholder, options, disabled }: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  placeholder: string;
-  options: { value: string; label: string }[];
-  disabled?: boolean;
+  label: string; value: string; onChange: (v: string) => void;
+  placeholder: string; options: { value: string; label: string }[]; disabled?: boolean;
 }) {
   return (
     <div>
