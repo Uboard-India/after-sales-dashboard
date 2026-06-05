@@ -1,6 +1,265 @@
 ﻿[
     {
         "Product":  "Uboard EVO Scooter",
+        "SparePart":  "Charger",
+        "MaxB2C":  "2600",
+        "MinB2B":  "2600",
+        "GST":  "5%"
+    },
+    {
+        "Product":  "Uboard EVO Scooter",
+        "SparePart":  "Pole",
+        "MaxB2C":  "2800",
+        "MinB2B":  "2800",
+        "GST":  "5%"
+    },
+    {
+        "Product":  "Uboard EVO Scooter",
+        "SparePart":  "Stand",
+        "MaxB2C":  "1800",
+        "MinB2B":  "1800",
+        "GST":  "5%"
+    },
+    {
+        "Product":  "Uboard Discovery",
+        "SparePart":  "brake set",
+        "MaxB2C":  "2500",
+        "MinB2B":  "2500",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard X7",
+        "SparePart":  "Stand",
+        "MaxB2C":  "1800",
+        "MinB2B":  "1800",
+        "GST":  "5%"
+    },
+    {
+        "Product":  "Uboard X7",
+        "SparePart":  "Pole",
+        "MaxB2C":  "2800",
+        "MinB2B":  "2800",
+        "GST":  "5%"
+    },
+    {
+        "Product":  "Uboard X7",
+        "SparePart":  "Brake sensor with wire",
+        "MaxB2C":  "",
+        "MinB2B":  "",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard X7",
+        "SparePart":  "Digital meter pressing lock",
+        "MaxB2C":  "",
+        "MinB2B":  "",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard X7",
+        "SparePart":  "PCB",
+        "MaxB2C":  "3000",
+        "MinB2B":  "3000",
+        "GST":  "5%"
+    },
+    {
+        "Product":  "Uboard SUV Hoverboard",
+        "SparePart":  "Chassis",
+        "MaxB2C":  "1800",
+        "MinB2B":  "1800",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Drifter",
+        "SparePart":  "Middle big screw",
+        "MaxB2C":  "450",
+        "MinB2B":  "450",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Drifter",
+        "SparePart":  "horn \u0026 switch set",
+        "MaxB2C":  "1500",
+        "MinB2B":  "1500",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Drifter",
+        "SparePart":  "Controller",
+        "MaxB2C":  "4800",
+        "MinB2B":  "4800",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Mini Explorer",
+        "SparePart":  "Tire + tube (1set)",
+        "MaxB2C":  "3500",
+        "MinB2B":  "3500",
+        "GST":  "included"
+    },
+    {
+        "Product":  "Uboard Mini Explorer",
+        "SparePart":  "Uboard Battery with 3 months warranty",
+        "MaxB2C":  "4500",
+        "MinB2B":  "4500",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Mini Explorer",
+        "SparePart":  "Motherboard",
+        "MaxB2C":  "4500",
+        "MinB2B":  "4500",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Tygatec Supersonic RC Car",
+        "SparePart":  "Chessy",
+        "MaxB2C":  "2500",
+        "MinB2B":  "2500",
+        "GST":  "included"
+    },
+    {
+        "Product":  "Tygatec Supersonic RC Car",
+        "SparePart":  "Wheelie bar",
+        "MaxB2C":  "na",
+        "MinB2B":  "na",
+        "GST":  "included"
+    },
+    {
+        "Product":  "Tygatec Supersonic RC Car",
+        "SparePart":  "Receiver",
+        "MaxB2C":  "2200",
+        "MinB2B":  "2200",
+        "GST":  "included"
+    },
+    {
+        "Product":  "Tygatec Supersonic RC Car",
+        "SparePart":  "Servo",
+        "MaxB2C":  "2000",
+        "MinB2B":  "2000",
+        "GST":  "included"
+    },
+    {
+        "Product":  "Tygatec Supersonic RC Car",
+        "SparePart":  "Tire each",
+        "MaxB2C":  "450",
+        "MinB2B":  "450",
+        "GST":  "included"
+    },
+    {
+        "Product":  "Tygatec Supersonic RC Car",
+        "SparePart":  "Battery",
+        "MaxB2C":  "2000",
+        "MinB2B":  "2000",
+        "GST":  "included"
+    },
+    {
+        "Product":  "Tygatec Supersonic RC Car",
+        "SparePart":  "Remote",
+        "MaxB2C":  "2000",
+        "MinB2B":  "2000",
+        "GST":  "included"
+    },
+    {
+        "Product":  "Tygatec Supersonic RC Car",
+        "SparePart":  "Axel/ driver sharft",
+        "MaxB2C":  "400",
+        "MinB2B":  "400",
+        "GST":  "included"
+    },
+    {
+        "Product":  "Tygatec Supersonic RC Car",
+        "SparePart":  "Gear set",
+        "MaxB2C":  "2000",
+        "MinB2B":  "2000",
+        "GST":  "included 18%"
+    },
+    {
+        "Product":  "Tygatec Supersonic RC Car",
+        "SparePart":  "Motor",
+        "MaxB2C":  "1800",
+        "MinB2B":  "1800",
+        "GST":  "included"
+    },
+    {
+        "Product":  "Tygatec Supersonic RC Car",
+        "SparePart":  "Cover",
+        "MaxB2C":  "700",
+        "MinB2B":  "700",
+        "GST":  "included"
+    },
+    {
+        "Product":  "Tygatec Supersonic RC Car",
+        "SparePart":  "Differential gear",
+        "MaxB2C":  "600",
+        "MinB2B":  "600",
+        "GST":  "included"
+    },
+    {
+        "Product":  "Tygatec Supersonic RC Car",
+        "SparePart":  "Knuckle HUB",
+        "MaxB2C":  "750",
+        "MinB2B":  "750",
+        "GST":  "included"
+    },
+    {
+        "Product":  "Tygatec Supersonic RC Car",
+        "SparePart":  "Body stand",
+        "MaxB2C":  "450",
+        "MinB2B":  "450",
+        "GST":  "included"
+    },
+    {
+        "Product":  "Tygatec Supersonic RC Car",
+        "SparePart":  "Battery",
+        "MaxB2C":  "350",
+        "MinB2B":  "350",
+        "GST":  "included"
+    },
+    {
+        "Product":  "Tygatec Smoke Car",
+        "SparePart":  "",
+        "MaxB2C":  "400",
+        "MinB2B":  "400",
+        "GST":  "included"
+    },
+    {
+        "Product":  "Uboard Space Bike",
+        "SparePart":  "Tube",
+        "MaxB2C":  "1500",
+        "MinB2B":  "1500",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Hybrid 8.5",
+        "SparePart":  "Body",
+        "MaxB2C":  "3000",
+        "MinB2B":  "3000",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Bolt",
+        "SparePart":  "Controller",
+        "MaxB2C":  "5000",
+        "MinB2B":  "5000",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Bolt",
+        "SparePart":  "Uboard Battery with 3 months warranty",
+        "MaxB2C":  "7000",
+        "MinB2B":  "7000",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard Space Bike",
+        "SparePart":  "Charging Slot",
+        "MaxB2C":  "",
+        "MinB2B":  "",
+        "GST":  "18%"
+    },
+    {
+        "Product":  "Uboard EVO Scooter",
         "SparePart":  "Mudguard with light Back",
         "MaxB2C":  "2600",
         "MinB2B":  "1800",
@@ -57,13 +316,6 @@
     },
     {
         "Product":  "Uboard EVO Scooter",
-        "SparePart":  "Charger",
-        "MaxB2C":  "2600",
-        "MinB2B":  "",
-        "GST":  "5%"
-    },
-    {
-        "Product":  "Uboard EVO Scooter",
         "SparePart":  "Controller",
         "MaxB2C":  "7500",
         "MinB2B":  "6800",
@@ -78,31 +330,17 @@
     },
     {
         "Product":  "Uboard EVO Scooter",
-        "SparePart":  "Pole",
-        "MaxB2C":  "2800",
-        "MinB2B":  "",
-        "GST":  "5%"
-    },
-    {
-        "Product":  "Uboard EVO Scooter",
-        "SparePart":  "Stand",
-        "MaxB2C":  "1800",
-        "MinB2B":  "",
-        "GST":  "5%"
-    },
-    {
-        "Product":  "Uboard EVO Scooter",
         "SparePart":  "Fendor",
         "MaxB2C":  "2000",
         "MinB2B":  "1500",
-        "GST":  "included"
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard EVO Scooter",
         "SparePart":  "Service Charges",
         "MaxB2C":  "650",
         "MinB2B":  "650",
-        "GST":  ""
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard Discovery",
@@ -137,7 +375,7 @@
         "SparePart":  "Charger",
         "MaxB2C":  "4500",
         "MinB2B":  "4000",
-        "GST":  "5%"
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard Discovery",
@@ -197,17 +435,10 @@
     },
     {
         "Product":  "Uboard Discovery",
-        "SparePart":  "brake set",
-        "MaxB2C":  "2500",
-        "MinB2B":  "",
-        "GST":  "18%"
-    },
-    {
-        "Product":  "Uboard Discovery",
         "SparePart":  "Service Charges",
         "MaxB2C":  "650",
         "MinB2B":  "650",
-        "GST":  ""
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard Pathfinder",
@@ -235,7 +466,7 @@
         "SparePart":  "Charger",
         "MaxB2C":  "2600",
         "MinB2B":  "2600",
-        "GST":  "5%"
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard Pathfinder",
@@ -270,7 +501,7 @@
         "SparePart":  "Service Charges",
         "MaxB2C":  "650",
         "MinB2B":  "650",
-        "GST":  ""
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard X7",
@@ -312,7 +543,7 @@
         "SparePart":  "Charger",
         "MaxB2C":  "2800",
         "MinB2B":  "2000",
-        "GST":  "5%"
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard X7",
@@ -344,20 +575,6 @@
     },
     {
         "Product":  "Uboard X7",
-        "SparePart":  "Stand",
-        "MaxB2C":  "1800",
-        "MinB2B":  "",
-        "GST":  "5%"
-    },
-    {
-        "Product":  "Uboard X7",
-        "SparePart":  "Pole",
-        "MaxB2C":  "2800",
-        "MinB2B":  "",
-        "GST":  "5%"
-    },
-    {
-        "Product":  "Uboard X7",
         "SparePart":  "Display cover",
         "MaxB2C":  "700",
         "MinB2B":  "700",
@@ -365,38 +582,17 @@
     },
     {
         "Product":  "Uboard X7",
-        "SparePart":  "Brake sensor with wire",
-        "MaxB2C":  "",
-        "MinB2B":  "",
-        "GST":  "18%"
-    },
-    {
-        "Product":  "Uboard X7",
-        "SparePart":  "Digital meter pressing lock",
-        "MaxB2C":  "",
-        "MinB2B":  "",
-        "GST":  "18%"
-    },
-    {
-        "Product":  "Uboard X7",
-        "SparePart":  "PCB",
-        "MaxB2C":  "3000",
-        "MinB2B":  "",
-        "GST":  "5%"
-    },
-    {
-        "Product":  "Uboard X7",
         "SparePart":  "Fendor",
         "MaxB2C":  "2000",
         "MinB2B":  "1500",
-        "GST":  "included"
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard X7",
         "SparePart":  "Service Charges",
         "MaxB2C":  "650",
         "MinB2B":  "650",
-        "GST":  ""
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard SUV Hoverboard",
@@ -424,14 +620,14 @@
         "SparePart":  "Charger with warranty",
         "MaxB2C":  "2380",
         "MinB2B":  "1250",
-        "GST":  "5%"
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard SUV Hoverboard",
         "SparePart":  "Charger without warranty",
         "MaxB2C":  "1430",
         "MinB2B":  "700",
-        "GST":  "5%"
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard SUV Hoverboard",
@@ -512,17 +708,10 @@
     },
     {
         "Product":  "Uboard SUV Hoverboard",
-        "SparePart":  "Chassis",
-        "MaxB2C":  "1800",
-        "MinB2B":  "",
-        "GST":  "18%"
-    },
-    {
-        "Product":  "Uboard SUV Hoverboard",
         "SparePart":  "Service Charges",
         "MaxB2C":  "650",
         "MinB2B":  "650",
-        "GST":  ""
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard Classic 6.5",
@@ -550,14 +739,14 @@
         "SparePart":  "Charger with warranty",
         "MaxB2C":  "2380",
         "MinB2B":  "1250",
-        "GST":  "5%"
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard Classic 6.5",
         "SparePart":  "Charger without warranty",
         "MaxB2C":  "1430",
         "MinB2B":  "700",
-        "GST":  "5%"
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard Classic 6.5",
@@ -634,7 +823,7 @@
         "SparePart":  "Service Charges",
         "MaxB2C":  "650",
         "MinB2B":  "650",
-        "GST":  ""
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard Infinity",
@@ -662,14 +851,14 @@
         "SparePart":  "Charger with warranty",
         "MaxB2C":  "2380",
         "MinB2B":  "1250",
-        "GST":  "5%"
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard Infinity",
         "SparePart":  "Charger without warranty",
         "MaxB2C":  "1430",
         "MinB2B":  "700",
-        "GST":  "5%"
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard Infinity",
@@ -732,7 +921,7 @@
         "SparePart":  "LED Light each",
         "MaxB2C":  "300",
         "MinB2B":  "300",
-        "GST":  ""
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard Infinity",
@@ -746,7 +935,7 @@
         "SparePart":  "Service Charges",
         "MaxB2C":  "650",
         "MinB2B":  "650",
-        "GST":  ""
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard Drifter",
@@ -774,14 +963,14 @@
         "SparePart":  "Charger with warranty",
         "MaxB2C":  "2380",
         "MinB2B":  "1250",
-        "GST":  "5%"
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard Drifter",
         "SparePart":  "Charger without warranty",
         "MaxB2C":  "1430",
         "MinB2B":  "700",
-        "GST":  "5%"
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard Drifter",
@@ -862,303 +1051,121 @@
     },
     {
         "Product":  "Uboard Drifter",
-        "SparePart":  "Middle big screw",
-        "MaxB2C":  "450",
-        "MinB2B":  "",
-        "GST":  "18%"
-    },
-    {
-        "Product":  "Uboard Drifter",
-        "SparePart":  "horn \u0026 switch set",
-        "MaxB2C":  "1500",
-        "MinB2B":  "",
-        "GST":  "18%"
-    },
-    {
-        "Product":  "Uboard Drifter",
         "SparePart":  "Back frame(peel)",
         "MaxB2C":  "3500",
         "MinB2B":  "2500",
-        "GST":  ""
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard Drifter",
         "SparePart":  "Middle rod",
-        "MaxB2C":  "",
+        "MaxB2C":  "1500",
         "MinB2B":  "1500",
-        "GST":  ""
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard Drifter",
         "SparePart":  "Handle grips",
-        "MaxB2C":  "",
+        "MaxB2C":  "500",
         "MinB2B":  "500",
-        "GST":  ""
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard Drifter",
         "SparePart":  "Chassis",
-        "MaxB2C":  "",
+        "MaxB2C":  "3000",
         "MinB2B":  "3000",
-        "GST":  ""
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard Drifter",
         "SparePart":  "Brake Switch",
-        "MaxB2C":  "",
+        "MaxB2C":  "1200",
         "MinB2B":  "1200",
-        "GST":  ""
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard Drifter",
         "SparePart":  "Speed Switch",
-        "MaxB2C":  "",
+        "MaxB2C":  "1200",
         "MinB2B":  "1200",
-        "GST":  ""
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard Drifter",
         "SparePart":  "Brake lever set",
-        "MaxB2C":  "",
+        "MaxB2C":  "1200",
         "MinB2B":  "1200",
-        "GST":  ""
-    },
-    {
-        "Product":  "Uboard Drifter",
-        "SparePart":  "Controller",
-        "MaxB2C":  "4800",
-        "MinB2B":  "",
         "GST":  "18%"
     },
     {
         "Product":  "Uboard Drifter",
         "SparePart":  "Service Charges",
-        "MaxB2C":  "650",
+        "MaxB2C":  "3000",
         "MinB2B":  "650",
-        "GST":  ""
-    },
-    {
-        "Product":  "Uboard Mini Explorer",
-        "SparePart":  "Tire + tube (1set)",
-        "MaxB2C":  "3500",
-        "MinB2B":  "",
-        "GST":  "included"
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard Mini Explorer",
         "SparePart":  "Charger",
-        "MaxB2C":  "2500",
+        "MaxB2C":  "1400",
         "MinB2B":  "1250 + gst",
-        "GST":  "5%"
-    },
-    {
-        "Product":  "Uboard Mini Explorer",
-        "SparePart":  "Uboard Battery with 3 months warranty",
-        "MaxB2C":  "4500",
-        "MinB2B":  "",
-        "GST":  "18%"
-    },
-    {
-        "Product":  "Uboard Mini Explorer",
-        "SparePart":  "Motherboard",
-        "MaxB2C":  "4500",
-        "MinB2B":  "",
         "GST":  "18%"
     },
     {
         "Product":  "Uboard Mini Explorer",
         "SparePart":  "Service Charges",
-        "MaxB2C":  "650",
+        "MaxB2C":  "2800",
         "MinB2B":  "650",
-        "GST":  ""
-    },
-    {
-        "Product":  "Tygatec Supersonic RC Car",
-        "SparePart":  "Chessy",
-        "MaxB2C":  "2500",
-        "MinB2B":  "",
-        "GST":  "included"
-    },
-    {
-        "Product":  "Tygatec Supersonic RC Car",
-        "SparePart":  "Wheelie bar",
-        "MaxB2C":  "na",
-        "MinB2B":  "",
-        "GST":  "included"
-    },
-    {
-        "Product":  "Tygatec Supersonic RC Car",
-        "SparePart":  "Receiver",
-        "MaxB2C":  "2200",
-        "MinB2B":  "",
-        "GST":  "included"
-    },
-    {
-        "Product":  "Tygatec Supersonic RC Car",
-        "SparePart":  "Servo",
-        "MaxB2C":  "2000",
-        "MinB2B":  "",
-        "GST":  "included"
-    },
-    {
-        "Product":  "Tygatec Supersonic RC Car",
-        "SparePart":  "Tire each",
-        "MaxB2C":  "450",
-        "MinB2B":  "",
-        "GST":  "included"
-    },
-    {
-        "Product":  "Tygatec Supersonic RC Car",
-        "SparePart":  "Battery",
-        "MaxB2C":  "2000",
-        "MinB2B":  "",
-        "GST":  "included"
-    },
-    {
-        "Product":  "Tygatec Supersonic RC Car",
-        "SparePart":  "Remote",
-        "MaxB2C":  "2000",
-        "MinB2B":  "",
-        "GST":  "included"
-    },
-    {
-        "Product":  "Tygatec Supersonic RC Car",
-        "SparePart":  "Axel/ driver sharft",
-        "MaxB2C":  "400",
-        "MinB2B":  "",
-        "GST":  "included"
-    },
-    {
-        "Product":  "Tygatec Supersonic RC Car",
-        "SparePart":  "Gear set",
-        "MaxB2C":  "2000",
-        "MinB2B":  "",
-        "GST":  "included 18%"
-    },
-    {
-        "Product":  "Tygatec Supersonic RC Car",
-        "SparePart":  "Motor",
-        "MaxB2C":  "1800",
-        "MinB2B":  "",
-        "GST":  "included"
-    },
-    {
-        "Product":  "Tygatec Supersonic RC Car",
-        "SparePart":  "Cover",
-        "MaxB2C":  "700",
-        "MinB2B":  "",
-        "GST":  "included"
-    },
-    {
-        "Product":  "Tygatec Supersonic RC Car",
-        "SparePart":  "Differential gear",
-        "MaxB2C":  "600",
-        "MinB2B":  "",
-        "GST":  "included"
-    },
-    {
-        "Product":  "Tygatec Supersonic RC Car",
-        "SparePart":  "Knuckle HUB",
-        "MaxB2C":  "750",
-        "MinB2B":  "",
-        "GST":  "included"
-    },
-    {
-        "Product":  "Tygatec Supersonic RC Car",
-        "SparePart":  "Body stand",
-        "MaxB2C":  "450",
-        "MinB2B":  "",
-        "GST":  "included"
-    },
-    {
-        "Product":  "Tygatec Supersonic RC Car",
-        "SparePart":  "Battery",
-        "MaxB2C":  "350",
-        "MinB2B":  "",
-        "GST":  "included"
-    },
-    {
-        "Product":  "Tygatec Smoke Car",
-        "SparePart":  "",
-        "MaxB2C":  "400",
-        "MinB2B":  "",
-        "GST":  "included"
+        "GST":  "18%"
     },
     {
         "Product":  "Tygatec Supersonic RC Car",
         "SparePart":  "Service Charges",
-        "MaxB2C":  "650",
+        "MaxB2C":  "500",
         "MinB2B":  "650",
-        "GST":  ""
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard Bumper Car",
         "SparePart":  "Body",
-        "MaxB2C":  "",
+        "MaxB2C":  "3000",
         "MinB2B":  "3000",
-        "GST":  ""
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard Bumper Car",
         "SparePart":  "Handle/ Joysticks",
-        "MaxB2C":  "",
+        "MaxB2C":  "1400",
         "MinB2B":  "1400",
-        "GST":  ""
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard Bumper Car",
         "SparePart":  "Battery",
-        "MaxB2C":  "",
+        "MaxB2C":  "2800",
         "MinB2B":  "2800",
-        "GST":  ""
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard Bumper Car",
         "SparePart":  "Rubber",
-        "MaxB2C":  "",
+        "MaxB2C":  "500",
         "MinB2B":  "500",
-        "GST":  ""
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard Bumper Car",
         "SparePart":  "Light cover",
-        "MaxB2C":  "",
+        "MaxB2C":  "600",
         "MinB2B":  "600",
-        "GST":  ""
+        "GST":  "18%"
     },
     {
         "Product":  "Uboard Bumper Car",
         "SparePart":  "Service Charges",
         "MaxB2C":  "650",
         "MinB2B":  "650",
-        "GST":  ""
-    },
-    {
-        "Product":  "Uboard Space Bike",
-        "SparePart":  "Tube",
-        "MaxB2C":  "1500",
-        "MinB2B":  "",
-        "GST":  "18%"
-    },
-    {
-        "Product":  "Uboard Hybrid 8.5",
-        "SparePart":  "Body",
-        "MaxB2C":  "3000",
-        "MinB2B":  "",
-        "GST":  "18%"
-    },
-    {
-        "Product":  "Uboard Bolt",
-        "SparePart":  "Controller",
-        "MaxB2C":  "5000",
-        "MinB2B":  "",
-        "GST":  "18%"
-    },
-    {
-        "Product":  "Uboard Bolt",
-        "SparePart":  "Uboard Battery with 3 months warranty",
-        "MaxB2C":  "7000",
-        "MinB2B":  "",
         "GST":  "18%"
     },
     {
@@ -1173,13 +1180,6 @@
         "SparePart":  "6.5 hoverboard handle",
         "MaxB2C":  "2000",
         "MinB2B":  "1200",
-        "GST":  ""
-    },
-    {
-        "Product":  "Uboard Space Bike",
-        "SparePart":  "Charging Slot",
-        "MaxB2C":  "",
-        "MinB2B":  "",
-        "GST":  ""
+        "GST":  "18%"
     }
 ]
