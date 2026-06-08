@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { RefreshCw, AlertCircle, LogOut, Table2, Bot, Factory, Pencil, Package } from "lucide-react";
+import { RefreshCw, AlertCircle, LogOut, Table2, Bot, Factory, Pencil, Package, User } from "lucide-react";
 import type { ComplaintRow, ApiResponse } from "@/lib/types";
 import HeroStats from "./HeroStats";
 import KPICard from "./KPICard";
@@ -281,6 +281,13 @@ export default function Dashboard() {
                 Updated {new Date(lastUpdated).toLocaleTimeString()}
               </span>
             )}
+            <Link
+              href="/my-work"
+              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition"
+            >
+              <User size={13} />
+              My Work
+            </Link>
             <Link
               href="/live"
               className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition"

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Search, X, Pencil } from "lucide-react";
+import { Search, X, Pencil, Phone } from "lucide-react";
 import type { ComplaintRow } from "@/lib/types";
 import UpdateTicketModal from "./UpdateTicketModal";
 
@@ -125,7 +125,7 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
         <table className="w-full text-xs">
           <thead>
             <tr className="border-b border-slate-100">
-              {["#", "Date", "Requested By", "Product", "Brand", "Issue Type", "Status", "Days Pending", "Ageing", ""].map((h) => (
+              {["#", "Date", "Customer", "Mobile", "Product", "Brand", "Issue Type", "Status", "Days Pending", "Ageing", ""].map((h) => (
                 <th key={h} className="text-left font-medium text-slate-400 pb-2 pr-3 whitespace-nowrap">{h}</th>
               ))}
             </tr>
@@ -136,6 +136,14 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
                 <td className="py-2 pr-3 text-slate-400 font-mono">{r.sequenceNo}</td>
                 <td className="py-2 pr-3 text-slate-600 whitespace-nowrap">{r.complaintDate}</td>
                 <td className="py-2 pr-3 font-medium text-slate-800 whitespace-nowrap">{r.requestBy || "—"}</td>
+                <td className="py-2 pr-3 text-slate-700 whitespace-nowrap">{r.customerName || "—"}</td>
+                <td className="py-2 pr-3 whitespace-nowrap">
+                  {r.customerMobile ? (
+                    <a href={`tel:${r.customerMobile}`} className="flex items-center gap-1 text-xs text-indigo-600 hover:underline font-mono">
+                      <Phone size={10} /> {r.customerMobile}
+                    </a>
+                  ) : <span className="text-slate-300">—</span>}
+                </td>
                 <td className="py-2 pr-3 text-slate-700 whitespace-nowrap">{r.productName || "—"}</td>
                 <td className="py-2 pr-3">
                   <span className="px-1.5 py-0.5 rounded text-xs bg-slate-100 text-slate-600">{r.brand}</span>
@@ -181,7 +189,7 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
             ))}
             {paged.length === 0 && (
               <tr>
-                <td colSpan={10} className="py-8 text-center text-slate-400">No tickets match the filters</td>
+                <td colSpan={12} className="py-8 text-center text-slate-400">No tickets match the filters</td>
               </tr>
             )}
           </tbody>
