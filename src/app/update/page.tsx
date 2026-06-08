@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  ArrowLeft, CheckCircle2, Loader2, Clock, User, Package,
+  CheckCircle2, Loader2, Clock, User, Package,
   Phone, Calendar, AlertTriangle,
 } from "lucide-react";
 import type { ComplaintRow } from "@/lib/types";
@@ -166,17 +166,11 @@ function UpdatePageInner() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Top bar */}
-      <div className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
-        <Link
-          href="/"
-          className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 transition"
-        >
-          <ArrowLeft size={14} /> Dashboard
-        </Link>
-        <span className="text-slate-300">|</span>
+      {/* Sub-header */}
+      <div className="max-w-2xl mx-auto px-4 pt-4 flex items-center gap-2">
         <span className="text-xs font-semibold text-slate-700">Update Ticket</span>
-        <span className="ml-auto text-xs text-slate-400 font-mono">{c.sequenceNo}</span>
+        <span className="text-slate-300 text-xs">·</span>
+        <span className="text-xs text-slate-400 font-mono">{c.sequenceNo}</span>
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">

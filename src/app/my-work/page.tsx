@@ -2,11 +2,10 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { ArrowLeft, Loader2, Pencil, Phone, AlertTriangle, CheckCircle2, Clock, User } from "lucide-react";
+import { Loader2, Pencil, Phone, AlertTriangle, CheckCircle2, Clock, User } from "lucide-react";
 import type { ComplaintRow, ApiResponse } from "@/lib/types";
 import { deriveBucket } from "@/lib/buckets";
 import { BUCKET_OWNER } from "@/lib/types";
-import NotificationBell from "@/components/NotificationBell";
 
 const TEAM = ["Prachi", "Adil", "Altab", "Asis"];
 
@@ -108,41 +107,27 @@ export default function MyWorkPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
-        <div className="max-w-screen-lg mx-auto px-4 sm:px-6 py-3 flex items-center gap-3 flex-wrap">
-          <Link href="/" className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition shrink-0">
-            <ArrowLeft size={13} /> Dashboard
-          </Link>
-          <div className="flex-1">
-            <h1 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <User size={18} className="text-indigo-600" />
-              My Work
-            </h1>
-            <p className="text-xs text-slate-400">Your assigned + accountability-bucket tickets</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-500 font-medium">Viewing as:</span>
-            <select
-              value={me}
-              onChange={e => handleMeChange(e.target.value)}
-              className="text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            >
-              <option value="">— select —</option>
-              {TEAM.map(t => <option key={t} value={t}>{t}</option>)}
-            </select>
-            <NotificationBell me={me} />
-            <button
-              onClick={() => { setRefreshing(true); fetchData(); }}
-              disabled={refreshing}
-              className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition disabled:opacity-50"
-            >
-              <Loader2 size={13} className={refreshing ? "animate-spin" : "hidden"} />
-              Refresh
-            </button>
-          </div>
-        </div>
-      </header>
+      {/* Sub-header */}
+      <div className="max-w-screen-lg mx-auto px-4 sm:px-6 py-2 flex items-center gap-3 flex-wrap">
+        <p className="text-xs font-semibold text-slate-700 flex-1">My Work</p>
+        <span className="text-xs text-slate-500 font-medium">Viewing as:</span>
+        <select
+          value={me}
+          onChange={e => handleMeChange(e.target.value)}
+          className="text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        >
+          <option value="">— select —</option>
+          {TEAM.map(t => <option key={t} value={t}>{t}</option>)}
+        </select>
+        <button
+          onClick={() => { setRefreshing(true); fetchData(); }}
+          disabled={refreshing}
+          className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition disabled:opacity-50"
+        >
+          <Loader2 size={13} className={refreshing ? "animate-spin" : "hidden"} />
+          Refresh
+        </button>
+      </div>
 
       <main className="max-w-screen-lg mx-auto px-4 sm:px-6 py-5 space-y-5">
         {error && (

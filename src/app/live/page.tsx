@@ -1,11 +1,9 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import Link from "next/link";
-import { ArrowLeft, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import type { ComplaintRow, ApiResponse } from "@/lib/types";
 import LiveFeedTable from "@/components/LiveFeedTable";
-import NotificationBell from "@/components/NotificationBell";
 
 const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const MONTH_ORDER: string[] = [];
@@ -17,9 +15,7 @@ export default function LivePage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [myName, setMyName] = useState("");
 
-  useEffect(() => { setMyName(localStorage.getItem("team_member") ?? ""); }, []);
 
   // Filters
   const [filterYear, setFilterYear] = useState("All");
@@ -88,42 +84,20 @@ export default function LivePage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
-        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition"
-            >
-              <ArrowLeft size={13} />
-              Dashboard
-            </Link>
-            <div>
-              <h1 className="text-lg font-bold text-slate-900">Live Data Feed</h1>
-              <p className="text-xs text-slate-400">
-                {data.length.toLocaleString()} total rows · FY 2025–26 &amp; FY 2026–27
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            {lastUpdated && (
-              <span className="text-xs text-slate-400 hidden sm:block">
-                Updated {new Date(lastUpdated).toLocaleTimeString()}
-              </span>
-            )}
-            <NotificationBell me={myName} />
-            <button
-              onClick={() => { setRefreshing(true); fetchData(); }}
-              disabled={refreshing}
-              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition disabled:opacity-50"
-            >
-              <RefreshCw size={13} className={refreshing ? "animate-spin" : ""} />
-              Refresh
-            </button>
-          </div>
-        </div>
-      </header>
+      {/* Sub-header */}
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-2 flex items-center justify-between">
+        <p className="text-xs text-slate-500 font-medium">Live Data Feed
+          <span className="text-slate-400 font-normal"> · {data.length.toLocaleString()} rows</span>
+        </p>
+        <button
+          onClick={() => { setRefreshing(true); fetchData(); }}
+          disabled={refreshing}
+          className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition disabled:opacity-50"
+        >
+          <RefreshCw size={13} className={refreshing ? "animate-spin" : ""} />
+          Refresh
+        </button>
+      </div>
 
       <main className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-5 space-y-4">
         {error && (

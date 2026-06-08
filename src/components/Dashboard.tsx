@@ -1,10 +1,8 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { RefreshCw, AlertCircle, LogOut, Table2, Bot, Factory, Pencil, Package, User } from "lucide-react";
-import NotificationBell from "./NotificationBell";
+import { RefreshCw, AlertCircle, Factory, Pencil, Bot } from "lucide-react";
 import type { ComplaintRow, ApiResponse } from "@/lib/types";
 import HeroStats from "./HeroStats";
 import KPICard from "./KPICard";
@@ -23,16 +21,13 @@ const MONTH_ORDER: string[] = [];
 for (let y = 2025; y <= 2028; y++) for (const m of MONTH_NAMES) MONTH_ORDER.push(`${m}-${y}`);
 
 export default function Dashboard() {
-  const router = useRouter();
   const [data, setData] = useState<ComplaintRow[]>([]);
   const [lastUpdated, setLastUpdated] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [loggingOut, setLoggingOut] = useState(false);
   const [botCount, setBotCount] = useState(0);
   const [drill, setDrill] = useState<{ label: string; rows: ComplaintRow[]; color: string } | null>(null);
-  const [myName, setMyName] = useState("");
 
   function handleDrillSelect(label: string, rows: ComplaintRow[], color: string) {
     if (!label) { setDrill(null); return; }
@@ -41,15 +36,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetch("/api/bot").then(r => r.json()).then(j => setBotCount(j.entries?.length ?? 0)).catch(() => {});
-    setMyName(localStorage.getItem("team_member") ?? "");
   }, []);
-
-  async function handleLogout() {
-    setLoggingOut(true);
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/login");
-    router.refresh();
-  }
 
   // Filters — filterYear starts empty and defaults to the LATEST fiscal year once data loads
   const [filterYear, setFilterYear] = useState("");
@@ -269,81 +256,20 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
-        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
-          <div>
-            <h1 className="text-lg font-bold text-slate-900">After Sales Dashboard</h1>
-            <p className="text-xs text-slate-400">FY 2025–26 · UBOARD & TYGATEC</p>
-          </div>
-          <div className="flex items-center gap-3">
-            {lastUpdated && (
-              <span className="text-xs text-slate-400 hidden sm:block">
-                Updated {new Date(lastUpdated).toLocaleTimeString()}
-              </span>
-            )}
-            <Link
-              href="/update"
-              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition font-medium"
-            >
-              <Pencil size={13} />
-              Update Ticket
-            </Link>
-            <Link
-              href="/my-work"
-              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition"
-            >
-              <User size={13} />
-              My Work
-            </Link>
-            <Link
-              href="/live"
-              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition"
-            >
-              <Table2 size={13} />
-              Live Feed
-            </Link>
-            <Link
-              href="/verify"
-              className="relative flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition"
-            >
-              <Bot size={13} />
-              Verification
-              {botCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                  <span className="relative inline-flex items-center justify-center rounded-full h-4 min-w-4 px-1 bg-red-500 text-white text-[9px] font-bold leading-none">
-                    {botCount}
-                  </span>
-                </span>
-              )}
-            </Link>
-            <button
-              onClick={() => router.push("/spareparts")}
-              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition"
-            >
-              <Package size={13} /> Spare Parts
-            </button>
-            <NotificationBell me={myName} />
-            <button
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition disabled:opacity-50"
-            >
-              <RefreshCw size={13} className={refreshing ? "animate-spin" : ""} />
-              Refresh
-            </button>
-            <button
-              onClick={handleLogout}
-              disabled={loggingOut}
-              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-600 transition disabled:opacity-50"
-            >
-              <LogOut size={13} />
-              {loggingOut ? "Signing out…" : "Sign Out"}
-            </button>
-          </div>
-        </div>
-      </header>
+      {/* Sub-header: last updated + refresh (nav is in global layout) */}
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-2 flex items-center justify-between">
+        <p className="text-xs text-slate-400">
+          {lastUpdated ? `Updated ${new Date(lastUpdated).toLocaleTimeString()}` : "Loading…"}
+        </p>
+        <button
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition disabled:opacity-50"
+        >
+          <RefreshCw size={13} className={refreshing ? "animate-spin" : ""} />
+          Refresh
+        </button>
+      </div>
 
       <main className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-5 space-y-5">
         {/* Error banner */}
