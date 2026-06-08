@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Search, X } from "lucide-react";
+import { Search, X, Pencil } from "lucide-react";
 import type { ComplaintRow } from "@/lib/types";
+import UpdateTicketModal from "./UpdateTicketModal";
 
 interface Props {
   rows: ComplaintRow[];
+  onSaved?: () => void;
 }
 
 const STATUS_BADGE: Record<string, string> = {
@@ -24,7 +26,8 @@ function uniq(arr: string[]) {
   return Array.from(new Set(arr.filter(Boolean))).sort();
 }
 
-export default function OpenTicketsTable({ rows }: Props) {
+export default function OpenTicketsTable({ rows, onSaved }: Props) {
+  const [editing, setEditing]           = useState<ComplaintRow | null>(null);
   const [search, setSearch]             = useState("");
   const [filterRequested, setRequested] = useState("All");
   const [filterProduct, setProduct]     = useState("All");
@@ -122,7 +125,7 @@ export default function OpenTicketsTable({ rows }: Props) {
         <table className="w-full text-xs">
           <thead>
             <tr className="border-b border-slate-100">
-              {["#", "Date", "Requested By", "Product", "Brand", "Issue Type", "Status", "Days Pending", "Ageing"].map((h) => (
+              {["#", "Date", "Requested By", "Product", "Brand", "Issue Type", "Status", "Days Pending", "Ageing", ""].map((h) => (
                 <th key={h} className="text-left font-medium text-slate-400 pb-2 pr-3 whitespace-nowrap">{h}</th>
               ))}
             </tr>
@@ -165,11 +168,20 @@ export default function OpenTicketsTable({ rows }: Props) {
                     }`}>{r.ageingDays}</span>
                   ) : "—"}
                 </td>
+                <td className="py-2">
+                  <button
+                    onClick={() => setEditing(r)}
+                    className="p-1.5 rounded-md text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 transition"
+                    title="Update this ticket"
+                  >
+                    <Pencil size={12} />
+                  </button>
+                </td>
               </tr>
             ))}
             {paged.length === 0 && (
               <tr>
-                <td colSpan={9} className="py-8 text-center text-slate-400">No tickets match the filters</td>
+                <td colSpan={10} className="py-8 text-center text-slate-400">No tickets match the filters</td>
               </tr>
             )}
           </tbody>
@@ -193,6 +205,14 @@ export default function OpenTicketsTable({ rows }: Props) {
             >Next</button>
           </div>
         </div>
+      )}
+
+      {editing && (
+        <UpdateTicketModal
+          row={editing}
+          onClose={() => setEditing(null)}
+          onSaved={() => { setEditing(null); onSaved?.(); }}
+        />
       )}
     </div>
   );

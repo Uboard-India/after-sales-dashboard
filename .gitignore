@@ -38,3 +38,5 @@ data*.csv
 *.mjs
 api_out.json
 .next-dev.log
+
+.vercel

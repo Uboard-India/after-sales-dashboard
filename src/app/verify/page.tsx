@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   ArrowLeft, Bot, CheckCircle2, Link2, XCircle,
   Phone, Package, Clock, AlertTriangle,
-  Undo2, Loader2, PhoneOff, ChevronDown, ChevronUp, User,
+  Undo2, Loader2, PhoneOff, ChevronDown, ChevronUp, User, Save,
 } from "lucide-react";
 import type { ComplaintRow, ApiResponse } from "@/lib/types";
 
@@ -102,18 +102,40 @@ export default function VerifyPage() {
   const [drafts, setDrafts] = useState<Record<string, Draft>>({});
   const [linkPicker, setLinkPicker] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"newest" | "oldest" | "duplicates" | "no-mobile" | "completion-low">("newest");
+  const [saving, setSaving] = useState<string | null>(null); // botId currently being saved
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [verifiedBy, setVerifiedBy] = useState("");
+
+  const TEAM = ["Prachi", "Adil", "Altab", "Asis"];
 
   useEffect(() => {
+    // Restore name from localStorage
+    const saved = localStorage.getItem("team_member");
+    if (saved) setVerifiedBy(saved);
+
     async function load() {
       try {
-        const [botRes, dataRes] = await Promise.all([
+        const [botRes, dataRes, verifyRes] = await Promise.all([
           fetch("/api/bot"),
           fetch("/api/data"),
+          fetch("/api/verify"),
         ]);
         const botJson = await botRes.json();
         const dataJson: ApiResponse = await dataRes.json();
+        const verifyJson = await verifyRes.json();
+
         setBotEntries(botJson.entries ?? []);
         setHelpdeskRows(dataJson.rows ?? []);
+
+        // Restore decisions already saved to Supabase
+        const saved: Record<string, Decision> = {};
+        for (const d of (verifyJson.decisions ?? [])) {
+          saved[d.bot_id] = {
+            decision: d.decision,
+            linkedTo: d.linked_complaint_id ?? undefined,
+          };
+        }
+        setDecisions(saved);
       } catch (e) {
         setError((e as Error).message);
       } finally {
@@ -170,10 +192,37 @@ export default function VerifyPage() {
   const done = botEntries.filter((e) => decisions[e.botId]);
   const noMobileCount = botEntries.filter((e) => !e.hasMobile).length;
 
-  function decide(botId: string, d: Decision) {
-    setDecisions(prev => ({ ...prev, [botId]: d }));
-    setExpandedId(null);
-    setLinkPicker(null);
+  async function decide(botId: string, d: Decision) {
+    setSaveError(null);
+    if (!verifiedBy) {
+      setSaveError("Please select your name before deciding.");
+      return;
+    }
+    setSaving(botId);
+    try {
+      localStorage.setItem("team_member", verifiedBy);
+      const res = await fetch("/api/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          botId,
+          decision: d.decision,
+          linkedTo: d.linkedTo,
+          verifiedBy,
+        }),
+      });
+      if (!res.ok) {
+        const j = await res.json();
+        throw new Error(j.error || "Save failed");
+      }
+      setDecisions(prev => ({ ...prev, [botId]: d }));
+      setExpandedId(null);
+      setLinkPicker(null);
+    } catch (e) {
+      setSaveError((e as Error).message);
+    } finally {
+      setSaving(null);
+    }
   }
 
   function undo(botId: string) {
@@ -227,6 +276,25 @@ export default function VerifyPage() {
             </div>
           </div>
         )}
+
+        {/* Who is reviewing */}
+        <div className="flex items-center gap-3 bg-white border border-slate-200 rounded-xl px-4 py-2.5">
+          <User size={14} className="text-slate-400 shrink-0" />
+          <span className="text-xs font-medium text-slate-500">Reviewing as:</span>
+          <select
+            value={verifiedBy}
+            onChange={e => { setVerifiedBy(e.target.value); localStorage.setItem("team_member", e.target.value); }}
+            className="text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          >
+            <option value="">— select your name —</option>
+            {TEAM.map(t => <option key={t} value={t}>{t}</option>)}
+          </select>
+          {saveError && (
+            <span className="text-xs text-red-600 flex items-center gap-1">
+              <AlertTriangle size={12} /> {saveError}
+            </span>
+          )}
+        </div>
 
         {/* Sort controls */}
         <div className="flex items-center gap-2 flex-wrap">
@@ -317,15 +385,17 @@ export default function VerifyPage() {
                   {/* Quick approve */}
                   <button
                     onClick={(ev) => { ev.stopPropagation(); decide(e.botId, { decision: "new", draft }); }}
-                    className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 font-semibold"
+                    disabled={saving === e.botId}
+                    className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 font-semibold disabled:opacity-50"
                     title="Approve as new complaint"
                   >
-                    <CheckCircle2 size={12} /> Approve
+                    {saving === e.botId ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle2 size={12} />} Approve
                   </button>
                   {/* Quick reject */}
                   <button
                     onClick={(ev) => { ev.stopPropagation(); decide(e.botId, { decision: "rejected" }); }}
-                    className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 font-semibold border border-red-200"
+                    disabled={saving === e.botId}
+                    className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 font-semibold border border-red-200 disabled:opacity-50"
                     title="Reject"
                   >
                     <XCircle size={12} /> Reject
@@ -456,9 +526,10 @@ export default function VerifyPage() {
                   <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-t-2 border-slate-100 bg-slate-50">
                     <button
                       onClick={() => decide(e.botId, { decision: "new", draft })}
-                      className="flex items-center gap-1.5 text-xs px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 font-semibold"
+                      disabled={saving === e.botId}
+                      className="flex items-center gap-1.5 text-xs px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 font-semibold disabled:opacity-50"
                     >
-                      <CheckCircle2 size={13} /> Approve as New Complaint
+                      {saving === e.botId ? <Loader2 size={13} className="animate-spin" /> : <CheckCircle2 size={13} />} Approve as New Complaint
                     </button>
                     {hasMatch && (
                       linkPicker === e.botId ? (
@@ -468,7 +539,8 @@ export default function VerifyPage() {
                             <button
                               key={m.id}
                               onClick={() => decide(e.botId, { decision: "linked", linkedTo: m.seq, draft })}
-                              className="px-2.5 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 font-mono font-semibold text-xs"
+                              disabled={saving === e.botId}
+                              className="px-2.5 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 font-mono font-semibold text-xs disabled:opacity-50"
                             >
                               #{m.seq}
                             </button>
@@ -480,13 +552,14 @@ export default function VerifyPage() {
                           onClick={() => setLinkPicker(e.botId)}
                           className="flex items-center gap-1.5 text-xs px-4 py-2 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-semibold border border-indigo-200"
                         >
-                          <Link2 size={13} /> Link to Existing
+                          <Link2 size={13} /> Link to Existing Complaint
                         </button>
                       )
                     )}
                     <button
                       onClick={() => decide(e.botId, { decision: "rejected" })}
-                      className="flex items-center gap-1.5 text-xs px-4 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 font-semibold border border-red-200 ml-auto"
+                      disabled={saving === e.botId}
+                      className="flex items-center gap-1.5 text-xs px-4 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 font-semibold border border-red-200 ml-auto disabled:opacity-50"
                     >
                       <XCircle size={13} /> Reject
                     </button>

@@ -22,7 +22,22 @@
       "Bash(vercel --prod --yes --name after-sales-dashboard)",
       "Bash(git commit *)",
       "Bash(git push *)",
-      "Bash(vercel env *)"
+      "Bash(vercel env *)",
+      "PowerShell(cd \"C:\\\\Users\\\\user\\\\after sales dashboard\"; curl.exe -s \"http://localhost:3000/api/data\" -H \"Cookie: auth_token=ca7894fee9e95bba3b8bfe54db351074037c6e6ae6255e1cf20a53a26e423555\" -o response.json; \\(Get-Content response.json -Raw\\).Length)",
+      "mcp__Claude_in_Chrome__list_connected_browsers",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "mcp__Claude_in_Chrome__navigate",
+      "mcp__Claude_in_Chrome__computer",
+      "mcp__Claude_in_Chrome__find",
+      "PowerShell(Get-Process node -ErrorAction SilentlyContinue)",
+      "PowerShell(Stop-Process -Force -Confirm:$false)",
+      "PowerShell($rows = Import-Csv bot-sheet.csv; $rows | Where-Object { $_.'Complaint Number' -ne '' } | Select-Object -Last 5 | Format-Table Timestamp,'Complaint Number',BRAND,PRODUCT,'CALL BACK NUMBER','Customer name',ISSUE -AutoSize)",
+      "Bash(npx vercel *)",
+      "Bash(start \"\" \"C:\\\\Users\\\\user\\\\after sales dashboard\")",
+      "Bash(awk -F'\\\\t' 'f==1 && $1!=\"\" && $1!=\"Product Name\"{print $1} /###SHEET###.*Costing Sheet/{f=1} /###SHEET###.*Repair Costing/{f=0}' _spare_raw.tsv)",
+      "Bash(awk -f _clean.awk _alias.tsv _spare_raw.tsv)",
+      "Bash(awk -F'\\\\t' '$1!~/^REVIEW/ && \\($3==\"\"||$4==\"\"\\){c++} END{print c\" rows with a missing Max or Min price\"}' _cost_clean.tsv)",
+      "PowerShell(& \"C:\\\\Users\\\\user\\\\after sales dashboard\\\\_build_xlsx.ps1\")"
     ]
   }
 }

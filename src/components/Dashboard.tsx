@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { RefreshCw, AlertCircle, LogOut, Table2, Bot, Factory, Package } from "lucide-react";
+import { RefreshCw, AlertCircle, LogOut, Table2, Bot, Factory, Pencil, Package } from "lucide-react";
 import type { ComplaintRow, ApiResponse } from "@/lib/types";
 import HeroStats from "./HeroStats";
 import KPICard from "./KPICard";
@@ -16,6 +16,7 @@ import ComplaintTypePie from "./ComplaintTypePie";
 import RequestByTable from "./RequestByTable";
 import OpenTicketsTable from "./OpenTicketsTable";
 import IssueByProductTable from "./IssueByProductTable";
+import UpdateTicketModal from "./UpdateTicketModal";
 
 const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const MONTH_ORDER: string[] = [];
@@ -31,6 +32,7 @@ export default function Dashboard() {
   const [loggingOut, setLoggingOut] = useState(false);
   const [botCount, setBotCount] = useState(0);
   const [drill, setDrill] = useState<{ label: string; rows: ComplaintRow[]; color: string } | null>(null);
+  const [drillEditing, setDrillEditing] = useState<ComplaintRow | null>(null);
 
   function handleDrillSelect(label: string, rows: ComplaintRow[], color: string) {
     if (!label) { setDrill(null); return; }
@@ -456,7 +458,7 @@ export default function Dashboard() {
               <table className="w-full text-xs">
                 <thead>
                   <tr className="border-b border-slate-100 bg-slate-50">
-                    {["Seq", "Date", "Customer", "Product", "Brand", "Platform", "Status", "Days Pending"].map((h) => (
+                    {["Seq", "Date", "Customer", "Product", "Brand", "Platform", "Status", "Days Pending", ""].map((h) => (
                       <th key={h} className="text-left px-4 py-2 text-slate-400 font-semibold whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
@@ -482,11 +484,20 @@ export default function Dashboard() {
                             </span>
                           ) : "—"}
                         </td>
+                        <td className="px-4 py-2">
+                          <button
+                            onClick={() => setDrillEditing(r)}
+                            className="p-1.5 rounded-md text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 transition"
+                            title="Update ticket"
+                          >
+                            <Pencil size={12} />
+                          </button>
+                        </td>
                       </tr>
                     );
                   })}
                   {drill.rows.length === 0 && (
-                    <tr><td colSpan={8} className="px-4 py-8 text-center text-slate-400">No complaints in this group</td></tr>
+                    <tr><td colSpan={9} className="px-4 py-8 text-center text-slate-400">No complaints in this group</td></tr>
                   )}
                 </tbody>
               </table>
@@ -518,8 +529,17 @@ export default function Dashboard() {
         <RequestByTable data={requestByData} />
 
         {/* Open Tickets Table */}
-        <OpenTicketsTable rows={openTickets} />
+        <OpenTicketsTable rows={openTickets} onSaved={handleRefresh} />
       </main>
+
+      {/* Drill-down edit modal */}
+      {drillEditing && (
+        <UpdateTicketModal
+          row={drillEditing}
+          onClose={() => setDrillEditing(null)}
+          onSaved={() => { setDrillEditing(null); handleRefresh(); }}
+        />
+      )}
     </div>
   );
 }
