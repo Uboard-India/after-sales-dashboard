@@ -283,6 +283,13 @@ export default function Dashboard() {
               </span>
             )}
             <Link
+              href="/update"
+              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition font-medium"
+            >
+              <Pencil size={13} />
+              Update Ticket
+            </Link>
+            <Link
               href="/my-work"
               className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition"
             >
@@ -496,10 +503,10 @@ export default function Dashboard() {
                         <td className="px-4 py-2">
                           <Link
                             href={`/update?id=${encodeURIComponent(r.id)}`}
-                            className="inline-flex p-1.5 rounded-md text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 transition"
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition whitespace-nowrap"
                             title="Update ticket"
                           >
-                            <Pencil size={12} />
+                            <Pencil size={11} /> Update
                           </Link>
                         </td>
                       </tr>

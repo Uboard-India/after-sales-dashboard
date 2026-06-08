@@ -277,10 +277,10 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
                 <td className="py-2">
                   <Link
                     href={`/update?id=${encodeURIComponent(r.id)}`}
-                    className="inline-flex items-center gap-1 p-1.5 rounded-md text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 transition"
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition whitespace-nowrap"
                     title="Update this ticket"
                   >
-                    <Pencil size={12} />
+                    <Pencil size={11} /> Update
                   </Link>
                 </td>
               </tr>
