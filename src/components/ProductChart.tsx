@@ -63,6 +63,7 @@ export default function ProductChart({ data, allRows }: Props) {
           <YAxis
             dataKey="name"
             type="category"
+            interval={0}
             tick={({ x, y, payload }) => (
               <text
                 x={x}
