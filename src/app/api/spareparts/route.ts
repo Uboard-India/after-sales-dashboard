@@ -32,19 +32,20 @@ export async function GET() {
       .order("created_at", { ascending: true }); // oldest first so latest overwrites
 
     if (updates && updates.length > 0) {
-      // Build override map: key = "product::sparePart", value = { MaxB2C, MinB2B, GST }
-      const overrides = new Map<string, Partial<PriceRow>>();
+      // Build override map: key = "product::sparePart", value = { MaxB2C, MinB2B, GST, _deleted }
+      const overrides = new Map<string, Partial<PriceRow> & { _deleted?: boolean }>();
 
       updates.forEach((u: { complaint_id: string; field: string; value: string }) => {
         const parts = u.complaint_id.replace(/^spare::/, "").split("::");
         if (parts.length < 2) return;
         const product   = parts[0];
-        const sparePart = parts.slice(1).join("::"); // spare part name may contain ::
+        const sparePart = parts.slice(1).join("::");
         const key = `${product}::${sparePart}`;
         const existing = overrides.get(key) ?? { Product: product, SparePart: sparePart };
         if (u.field === "max_b2c") existing.MaxB2C = u.value;
         if (u.field === "min_b2b") existing.MinB2B = u.value;
         if (u.field === "gst")     existing.GST     = u.value;
+        if (u.field === "deleted") existing._deleted = u.value === "true";
         overrides.set(key, existing);
       });
 
@@ -52,15 +53,20 @@ export async function GET() {
         const [product, ...spParts] = key.split("::");
         const sparePart = spParts.join("::");
         const idx = priceList.findIndex(r => r.Product === product && r.SparePart === sparePart);
+        if (override._deleted) {
+          // Remove from price list
+          if (idx >= 0) priceList.splice(idx, 1);
+          return;
+        }
         if (idx >= 0) {
           priceList[idx] = { ...priceList[idx], ...override } as PriceRow;
         } else {
           priceList.push({
-            Product:  override.Product  ?? product,
+            Product:   override.Product   ?? product,
             SparePart: override.SparePart ?? sparePart,
-            MaxB2C:   override.MaxB2C   ?? "",
-            MinB2B:   override.MinB2B   ?? "",
-            GST:      override.GST      ?? "",
+            MaxB2C:    override.MaxB2C    ?? "",
+            MinB2B:    override.MinB2B    ?? "",
+            GST:       override.GST       ?? "",
           });
         }
       });
@@ -76,7 +82,7 @@ export async function POST(request: Request) {
   try {
     const { supabaseAdmin } = await import("@/lib/supabase");
     const body = await request.json();
-    const { product, sparePart, maxB2C, minB2B, gst, changedBy, isNew } = body;
+    const { product, sparePart, maxB2C, minB2B, gst, changedBy, isNew, deleted } = body;
 
     if (!product || !sparePart || !changedBy) {
       return NextResponse.json({ error: "product, sparePart and changedBy are required" }, { status: 400 });
@@ -91,7 +97,9 @@ export async function POST(request: Request) {
 
     const rows: { complaint_id: string; field: string; value: string; updated_by: string; created_at: string }[] = [];
 
-    if (isNew) {
+    if (deleted) {
+      rows.push({ complaint_id: complaintId, field: "deleted", value: "true", updated_by: changedBy || "Deleted", created_at: now });
+    } else if (isNew) {
       // For new parts, write all 3 fields unconditionally
       rows.push({ complaint_id: complaintId, field: "max_b2c", value: maxB2C || "", updated_by: changedBy, created_at: now });
       rows.push({ complaint_id: complaintId, field: "min_b2b", value: minB2B || "", updated_by: changedBy, created_at: now });

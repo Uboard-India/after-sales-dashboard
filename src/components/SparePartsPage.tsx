@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Search, LogOut, LayoutDashboard, Package, Calculator, X, Pencil, Plus } from "lucide-react";
+import { Search, LogOut, LayoutDashboard, Package, Calculator, X, Pencil, Plus, Trash2 } from "lucide-react";
 import PriceCalculator from "./PriceCalculator";
 import SparePartEditModal from "./SparePartEditModal";
 import type { SparePartsData, PriceListRow } from "@/lib/spareparts-types";
@@ -34,6 +34,10 @@ export default function SparePartsPage() {
   const [loading, setLoading] = useState(true);
   const [calcOpen, setCalcOpen] = useState(false);
   const [editRow, setEditRow] = useState<PriceListRow | null | "new">(null);
+  const [deleteRow, setDeleteRow] = useState<PriceListRow | null>(null);
+  const [deleteCode, setDeleteCode] = useState("");
+  const [deleteError, setDeleteError] = useState("");
+  const [deleting, setDeleting] = useState(false);
   const [search, setSearch] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [brand, setBrand] = useState("All");
@@ -154,12 +158,94 @@ export default function SparePartsPage() {
               onClose={() => setEditRow(null)}
               onSaved={() => {
                 setEditRow(null);
-                // Force reload — bypass any browser cache
                 fetch(`/api/spareparts?t=${Date.now()}`, { cache: "no-store" })
                   .then(r => r.json())
                   .then((d: SparePartsData) => setData(d));
               }}
             />
+          )}
+
+          {/* Delete confirmation modal */}
+          {deleteRow && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center shrink-0">
+                    <Trash2 size={18} className="text-red-600" />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-bold text-slate-900">Delete Spare Part</h2>
+                    <p className="text-xs text-slate-400 mt-0.5">{deleteRow.Product}</p>
+                  </div>
+                </div>
+
+                <p className="text-sm text-slate-700 mb-1">
+                  Delete <strong>{deleteRow.SparePart}</strong>?
+                </p>
+                <p className="text-xs text-slate-400 mb-4">This part will be removed from the price list and calculator.</p>
+
+                <div className="mb-4">
+                  <label className="text-xs font-medium text-slate-500 block mb-1.5">Enter code to confirm</label>
+                  <input
+                    type="password"
+                    value={deleteCode}
+                    onChange={e => { setDeleteCode(e.target.value); setDeleteError(""); }}
+                    placeholder="Enter code"
+                    autoFocus
+                    className="w-full px-3 py-2.5 text-sm border-2 border-slate-200 rounded-xl focus:outline-none focus:border-red-400 transition"
+                  />
+                  {deleteError && (
+                    <p className="text-xs text-red-600 mt-1.5">{deleteError}</p>
+                  )}
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => { setDeleteRow(null); setDeleteCode(""); setDeleteError(""); }}
+                    className="flex-1 py-2.5 rounded-xl text-sm font-medium border-2 border-slate-200 text-slate-600 hover:bg-slate-50 transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    disabled={deleting}
+                    onClick={async () => {
+                      if (deleteCode !== "1234") { setDeleteError("Wrong code"); return; }
+                      setDeleting(true);
+                      try {
+                        const res = await fetch("/api/spareparts", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            product: deleteRow.Product,
+                            sparePart: deleteRow.SparePart,
+                            maxB2C: "",
+                            minB2B: "",
+                            gst: "",
+                            changedBy: "Deleted",
+                            isNew: false,
+                            deleted: true,
+                          }),
+                        });
+                        if (!res.ok) throw new Error("Delete failed");
+                        setDeleteRow(null);
+                        setDeleteCode("");
+                        // Reload data
+                        fetch(`/api/spareparts?t=${Date.now()}`, { cache: "no-store" })
+                          .then(r => r.json())
+                          .then((d: SparePartsData) => setData(d));
+                      } catch {
+                        setDeleteError("Something went wrong");
+                      } finally {
+                        setDeleting(false);
+                      }
+                    }}
+                    className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white transition"
+                  >
+                    {deleting ? "Deleting…" : "Delete"}
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </header>
@@ -359,10 +445,16 @@ export default function SparePartsPage() {
                             {r.GST || "—"}
                           </td>
                           <td className="px-2 py-3 text-right">
-                            <button onClick={() => setEditRow(r)}
-                              className="opacity-0 group-hover:opacity-100 transition p-1 rounded-md hover:bg-indigo-50 text-slate-400 hover:text-indigo-600">
-                              <Pencil size={13} />
-                            </button>
+                            <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition">
+                              <button onClick={() => setEditRow(r)}
+                                className="p-1 rounded-md hover:bg-indigo-50 text-slate-400 hover:text-indigo-600 transition">
+                                <Pencil size={13} />
+                              </button>
+                              <button onClick={() => { setDeleteRow(r); setDeleteCode(""); setDeleteError(""); }}
+                                className="p-1 rounded-md hover:bg-red-50 text-slate-400 hover:text-red-500 transition">
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       );
