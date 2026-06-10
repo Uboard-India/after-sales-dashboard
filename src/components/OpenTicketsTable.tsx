@@ -42,6 +42,8 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
   const [filterStatus, setStatus]       = useState("All");
   const [filterIssue, setIssue]         = useState("All");
   const [filterBrand, setBrand]         = useState("All");
+  const [filterPending, setPending]     = useState("All");
+  const [sortDate, setSortDate]         = useState<"asc" | "desc">("asc");
   const [page, setPage]                 = useState(1);
   const [selected, setSelected]         = useState<Set<string>>(new Set());
   const [showBulk, setShowBulk]         = useState(false);
@@ -60,9 +62,17 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
     brands:    uniq(rows.map((r) => r.brand)),
   }), [rows]);
 
+  // Parse DD/MM/YYYY → sortable number
+  function parseDateNum(s: string): number {
+    if (!s) return 0;
+    const p = s.split("/");
+    if (p.length !== 3) return 0;
+    return parseInt(p[2]) * 10000 + parseInt(p[1]) * 100 + parseInt(p[0]);
+  }
+
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
-    return rows.filter((r) => {
+    const base = rows.filter((r) => {
       if (filterRequested !== "All" && r.requestBy !== filterRequested) return false;
       if (filterProduct   !== "All" && r.productName !== filterProduct)  return false;
       if (filterStatus    !== "All") {
@@ -71,6 +81,14 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
       }
       if (filterIssue  !== "All" && r.issueType !== filterIssue)         return false;
       if (filterBrand  !== "All" && r.brand     !== filterBrand)         return false;
+      // Pending Since filter
+      if (filterPending !== "All") {
+        const d = r.daysPending ?? 0;
+        if (filterPending === "1 Month"  && !(d <= 30))  return false;
+        if (filterPending === "2 Months" && !(d >= 31 && d <= 60)) return false;
+        if (filterPending === "3 Months" && !(d >= 61 && d <= 90)) return false;
+        if (filterPending === "3+ Months" && !(d > 90))  return false;
+      }
       if (q &&
         !r.sequenceNo.toLowerCase().includes(q) &&
         !r.productName.toLowerCase().includes(q) &&
@@ -81,19 +99,24 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
       ) return false;
       return true;
     });
-  }, [rows, search, filterRequested, filterProduct, filterStatus, filterIssue, filterBrand]);
+    // Sort by date
+    return [...base].sort((a, b) => {
+      const diff = parseDateNum(a.complaintDate) - parseDateNum(b.complaintDate);
+      return sortDate === "asc" ? diff : -diff;
+    });
+  }, [rows, search, filterRequested, filterProduct, filterStatus, filterIssue, filterBrand, filterPending, sortDate]);
 
   const totalPages = Math.ceil(filtered.length / PER_PAGE);
   const paged = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   function reset() {
     setSearch(""); setRequested("All"); setProduct("All");
-    setStatus("All"); setIssue("All"); setBrand("All"); setPage(1);
+    setStatus("All"); setIssue("All"); setBrand("All"); setPending("All"); setPage(1);
   }
 
   const hasFilters =
     search || filterRequested !== "All" || filterProduct !== "All" ||
-    filterStatus !== "All" || filterIssue !== "All" || filterBrand !== "All";
+    filterStatus !== "All" || filterIssue !== "All" || filterBrand !== "All" || filterPending !== "All";
 
   // Bulk helpers
   const allPageIds = paged.map((r) => r.id);
@@ -198,6 +221,7 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
         <TinySelect label="Status"  value={filterStatus}    options={["All", ...opts.statuses]}  onChange={(v) => { setStatus(v);   setPage(1); }} />
         <TinySelect label="Issue"   value={filterIssue}     options={["All", ...opts.issues]}    onChange={(v) => { setIssue(v);    setPage(1); }} />
         <TinySelect label="Brand"   value={filterBrand}     options={["All", ...opts.brands]}    onChange={(v) => { setBrand(v);    setPage(1); }} />
+        <TinySelect label="Pending Since" value={filterPending} options={["All", "1 Month", "2 Months", "3 Months", "3+ Months"]} onChange={(v) => { setPending(v); setPage(1); }} />
         {hasFilters && (
           <button
             onClick={reset}
@@ -218,9 +242,16 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
                   {allPageSelected ? <CheckSquare size={14} className="text-indigo-500" /> : <Square size={14} />}
                 </button>
               </th>
-              {["#", "Date", "Customer", "Mobile", "Product", "Brand", "Issue Type", "Status", "Days Pending", "Ageing", ""].map((h) => (
+              {["#", "Customer", "Mobile", "Product", "Brand", "Issue Type", "Status", "Days Pending", "Pending Since", ""].map((h) => (
                 <th key={h} className="text-left font-medium text-slate-400 pb-2 pr-3 whitespace-nowrap">{h}</th>
               ))}
+              <th className="text-left pb-2 pr-3 whitespace-nowrap">
+                <button onClick={() => setSortDate(s => s === "asc" ? "desc" : "asc")}
+                  className="flex items-center gap-1 text-xs font-medium text-slate-400 hover:text-indigo-600 transition group">
+                  Date
+                  <span className="text-[10px] group-hover:text-indigo-600">{sortDate === "asc" ? "↑" : "↓"}</span>
+                </button>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -232,7 +263,6 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
                   </button>
                 </td>
                 <td className="py-2 pr-3 text-slate-400 font-mono">{r.sequenceNo}</td>
-                <td className="py-2 pr-3 text-slate-600 whitespace-nowrap">{r.complaintDate}</td>
                 <td className="py-2 pr-3 font-medium text-slate-800 whitespace-nowrap">{r.requestBy || "—"}</td>
                 <td className="py-2 pr-3 text-slate-700 whitespace-nowrap">{r.customerName || "—"}</td>
                 <td className="py-2 pr-3 whitespace-nowrap">
@@ -265,15 +295,14 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
                   ) : "—"}
                 </td>
                 <td className="py-2 pr-3">
-                  {r.ageingDays ? (
-                    <span className={`px-1.5 py-0.5 rounded text-xs ${
-                      r.ageingDays === "90+"   ? "bg-red-100 text-red-700" :
-                      r.ageingDays === "61-90" ? "bg-orange-100 text-orange-700" :
-                      r.ageingDays === "31-60" ? "bg-yellow-100 text-yellow-700" :
-                      "bg-green-100 text-green-700"
-                    }`}>{r.ageingDays}</span>
-                  ) : "—"}
+                  {(() => {
+                    const d = r.daysPending ?? 0;
+                    const label = d > 90 ? "3+ Months" : d > 60 ? "3 Months" : d > 30 ? "2 Months" : "1 Month";
+                    const cls = d > 90 ? "bg-red-100 text-red-700" : d > 60 ? "bg-orange-100 text-orange-700" : d > 30 ? "bg-yellow-100 text-yellow-700" : "bg-green-100 text-green-700";
+                    return r.daysPending != null ? <span className={`px-1.5 py-0.5 rounded text-xs ${cls}`}>{label}</span> : <span className="text-slate-300">—</span>;
+                  })()}
                 </td>
+                <td className="py-2 pr-3 text-slate-600 whitespace-nowrap">{r.complaintDate}</td>
                 <td className="py-2">
                   <Link
                     href={`/update?id=${encodeURIComponent(r.id)}`}

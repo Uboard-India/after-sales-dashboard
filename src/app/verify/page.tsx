@@ -103,6 +103,7 @@ export default function VerifyPage() {
   const [drafts, setDrafts] = useState<Record<string, Draft>>({});
   const [linkPicker, setLinkPicker] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"newest" | "oldest" | "duplicates" | "no-mobile" | "completion-low">("newest");
+  const [filterPerson, setFilterPerson] = useState("All");
   const [saving, setSaving] = useState<string | null>(null); // botId currently being saved
   const [saveError, setSaveError] = useState<string | null>(null);
   const [verifiedBy, setVerifiedBy] = useState("");
@@ -169,8 +170,12 @@ export default function VerifyPage() {
     return new Date(`${year}-${month}-${day}`).getTime() || 0;
   }
 
+  // Unique persons from category field (e.g. "Prachi Bot", "Adil Bot")
+  const personOptions = ["All", ...Array.from(new Set(botEntries.map((e) => (e as BotEntry & { category?: string }).category || "").filter(Boolean))).sort()];
+
   const pending = botEntries
     .filter((e) => !decisions[e.botId])
+    .filter((e) => filterPerson === "All" || (e as BotEntry & { category?: string }).category === filterPerson)
     .sort((a, b) => {
       if (sortBy === "newest") {
         const d = parseTs(b.timestamp) - parseTs(a.timestamp);
@@ -301,7 +306,23 @@ export default function VerifyPage() {
           )}
         </div>
 
-        {/* Sort controls */}
+        {/* Person filter + Sort controls */}
+        <div className="flex items-center gap-3 flex-wrap bg-white border border-slate-200 rounded-xl px-4 py-2.5">
+          <span className="text-xs font-medium text-slate-500">Person:</span>
+          <select
+            value={filterPerson}
+            onChange={e => setFilterPerson(e.target.value)}
+            className="text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          >
+            {personOptions.map(p => <option key={p} value={p}>{p}</option>)}
+          </select>
+          {filterPerson !== "All" && (
+            <button onClick={() => setFilterPerson("All")} className="text-xs text-indigo-600 hover:underline">
+              Clear
+            </button>
+          )}
+        </div>
+
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-xs text-slate-400 font-medium">Sort by:</span>
           {(["newest", "oldest", "duplicates", "no-mobile", "completion-low"] as const).map((s) => (

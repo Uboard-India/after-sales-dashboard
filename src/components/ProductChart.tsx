@@ -46,11 +46,12 @@ export default function ProductChart({ data, allRows }: Props) {
       <h2 className="text-sm font-semibold text-slate-700 mb-1">Complaints by Product</h2>
       <p className="text-xs text-slate-400 mb-3">Click a bar to drill into open complaints</p>
 
-      <ResponsiveContainer width="100%" height={Math.max(320, data.length * 28)}>
+      <ResponsiveContainer width="100%" height={Math.max(data.length * 46, 300)}>
         <BarChart
           data={data}
           layout="vertical"
-          margin={{ top: 0, right: 10, left: 10, bottom: 0 }}
+          barSize={18}
+          margin={{ top: 4, right: 10, left: 10, bottom: 4 }}
           onClick={(e) => {
             if (e?.activePayload?.[0]) {
               const name = e.activePayload[0].payload.name;
@@ -86,8 +87,14 @@ export default function ProductChart({ data, allRows }: Props) {
             contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #E2E8F0" }}
             cursor={{ fill: "#F8FAFC" }}
           />
-          <Legend wrapperStyle={{ fontSize: 12 }} />
-          <Bar dataKey="closed" name="Closed" stackId="a" radius={[0, 0, 0, 0]}>
+          <Legend
+            wrapperStyle={{ fontSize: 12 }}
+            formatter={(value) => (
+              <span style={{ color: "#64748B", fontSize: 12 }}>{value}</span>
+            )}
+            iconType="square"
+          />
+          <Bar dataKey="closed" name="Closed" stackId="a" fill="#4F46E5" radius={[0, 0, 0, 0]}>
             {data.map((entry) => (
               <Cell
                 key={entry.name}
@@ -97,7 +104,7 @@ export default function ProductChart({ data, allRows }: Props) {
               />
             ))}
           </Bar>
-          <Bar dataKey="open" name="Open" stackId="a" radius={[0, 3, 3, 0]}>
+          <Bar dataKey="open" name="Open" stackId="a" fill="#F59E0B" radius={[0, 3, 3, 0]}>
             {data.map((entry) => (
               <Cell
                 key={entry.name}
