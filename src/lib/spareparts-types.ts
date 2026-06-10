@@ -25,3 +25,14 @@ export interface SparePartsData {
   priceList: PriceListRow[];
   repairLog: RepairLogRow[];
 }
+
+export interface HistoryRow {
+  id: string;
+  product: string;
+  spare_part: string;
+  field_changed: string;
+  old_value: string;
+  new_value: string;
+  changed_by: string;
+  changed_at: string;
+}

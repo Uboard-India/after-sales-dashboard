@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Search, LogOut, LayoutDashboard, Package, Calculator, X } from "lucide-react";
+import { Search, LogOut, LayoutDashboard, Package, Calculator, X, Pencil, Plus } from "lucide-react";
 import PriceCalculator from "./PriceCalculator";
+import SparePartEditModal from "./SparePartEditModal";
 import type { SparePartsData, PriceListRow } from "@/lib/spareparts-types";
 
 /* ─────────────────────────── helpers ─────────────────────────── */
@@ -32,6 +33,7 @@ export default function SparePartsPage() {
   const [data, setData] = useState<SparePartsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [calcOpen, setCalcOpen] = useState(false);
+  const [editRow, setEditRow] = useState<PriceListRow | null | "new">(null);
   const [search, setSearch] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [brand, setBrand] = useState("All");
@@ -145,6 +147,18 @@ export default function SparePartsPage() {
             </button>
           </div>
           <PriceCalculator open={calcOpen} onClose={() => setCalcOpen(false)} />
+          {editRow !== null && (
+            <SparePartEditModal
+              row={editRow === "new" ? null : editRow}
+              product={selectedProduct ?? ""}
+              onClose={() => setEditRow(null)}
+              onSaved={() => {
+                setEditRow(null);
+                // Reload data to reflect edits
+                fetch("/api/spareparts").then(r => r.json()).then((d: SparePartsData) => setData(d));
+              }}
+            />
+          )}
         </div>
       </header>
 
@@ -314,6 +328,7 @@ export default function SparePartsPage() {
                         <span className="text-indigo-700 bg-indigo-50 px-2 py-1 rounded-md">Max — B2C</span>
                       </th>
                       <th className="text-center px-5 py-3 font-medium text-slate-500 text-xs w-24">GST</th>
+                      <th className="w-10"></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -322,7 +337,7 @@ export default function SparePartsPage() {
                       const b2c = fmtRs(r.MaxB2C);
                       const isService = r.SparePart.toLowerCase().includes("service");
                       return (
-                        <tr key={i} className={`border-b border-slate-50 hover:bg-slate-50 transition ${isService ? "bg-slate-50/50" : ""}`}>
+                        <tr key={i} className={`border-b border-slate-50 hover:bg-slate-50 group transition ${isService ? "bg-slate-50/50" : ""}`}>
                           <td className="px-5 py-3 text-slate-800">
                             {isService
                               ? <span className="italic text-slate-500">{r.SparePart}</span>
@@ -341,6 +356,12 @@ export default function SparePartsPage() {
                           <td className="px-5 py-3 text-center text-xs text-slate-400">
                             {r.GST || "—"}
                           </td>
+                          <td className="px-2 py-3 text-right">
+                            <button onClick={() => setEditRow(r)}
+                              className="opacity-0 group-hover:opacity-100 transition p-1 rounded-md hover:bg-indigo-50 text-slate-400 hover:text-indigo-600">
+                              <Pencil size={13} />
+                            </button>
+                          </td>
                         </tr>
                       );
                     })}
@@ -348,12 +369,16 @@ export default function SparePartsPage() {
                 </table>
               </div>
 
-              {/* Bottom note */}
-              <div className="px-5 py-3 border-t border-slate-100 bg-slate-50/50 rounded-b-xl">
+              {/* Bottom note + Add Part */}
+              <div className="px-5 py-3 border-t border-slate-100 bg-slate-50/50 rounded-b-xl flex items-center justify-between gap-4">
                 <p className="text-xs text-slate-400">
-                  <strong className="text-slate-500">In-warranty repair:</strong> charge customer <strong>₹0</strong>, internal cost = Min (B2B) price. &nbsp;·&nbsp;
-                  <strong className="text-slate-500">Out-of-warranty:</strong> charge customer Max (B2C) price.
+                  <strong className="text-slate-500">In-warranty:</strong> internal cost = Min (B2B). &nbsp;·&nbsp;
+                  <strong className="text-slate-500">Out-of-warranty:</strong> charge Max (B2C).
                 </p>
+                <button onClick={() => setEditRow("new")}
+                  className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition font-medium shrink-0">
+                  <Plus size={12} /> Add Part
+                </button>
               </div>
             </div>
           ) : (
