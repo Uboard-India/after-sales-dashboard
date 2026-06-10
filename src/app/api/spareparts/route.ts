@@ -2,34 +2,80 @@ import { NextResponse } from "next/server";
 import productMaster from "@/data/product-master.json";
 import priceListBase from "@/data/price-list.json";
 import repairLog from "@/data/repair-log.json";
+import { getGoogleAccessToken } from "@/lib/googleAuth";
+
+// Bot sheet is used as the write-layer for spare parts overrides.
+// Tabs "Spare Parts Custom" and "Spare Parts History" are auto-created on first use.
+const BOT_SHEET_ID = "1UXYV_aiQnwm7llAbNSu4x0noS2vztj3My3aNrJmi9lU";
+
+const CUSTOM_TAB   = "Spare Parts Custom";
+const HISTORY_TAB  = "Spare Parts History";
+const CUSTOM_HEADERS  = ["Product", "Spare Part", "Max B2C", "Min B2B", "GST", "Updated By", "Updated At"];
+const HISTORY_HEADERS = ["Product", "Spare Part", "Field Changed", "Old Value", "New Value", "Changed By", "Changed At"];
+
+async function sheetsGet(token: string, tab: string): Promise<string[][]> {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${BOT_SHEET_ID}/values/${encodeURIComponent(tab)}`;
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  if (res.status === 400) return []; // tab doesn't exist yet
+  if (!res.ok) return [];
+  const j = await res.json();
+  return (j.values as string[][]) ?? [];
+}
+
+async function sheetsAppend(token: string, tab: string, values: string[][]): Promise<void> {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${BOT_SHEET_ID}/values/${encodeURIComponent(tab)}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
+  await fetch(url, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ values }),
+  });
+}
+
+async function sheetsUpdate(token: string, range: string, values: string[][]): Promise<void> {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${BOT_SHEET_ID}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
+  await fetch(url, {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ values }),
+  });
+}
+
+async function ensureTab(token: string, title: string, headers: string[]): Promise<void> {
+  // Try reading; if 400, create the tab
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${BOT_SHEET_ID}/values/${encodeURIComponent(title)}`;
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  if (res.ok) return; // tab exists
+
+  // Create tab
+  const batchUrl = `https://sheets.googleapis.com/v4/spreadsheets/${BOT_SHEET_ID}:batchUpdate`;
+  await fetch(batchUrl, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ requests: [{ addSheet: { properties: { title } } }] }),
+  });
+  // Add headers
+  await sheetsAppend(token, title, [headers]);
+}
 
 export async function GET() {
   let priceList = [...(priceListBase as { Product: string; SparePart: string; MaxB2C: string; MinB2B: string; GST: string }[])];
 
-  // Merge Supabase custom rows (overrides + additions)
   try {
-    const { supabaseAdmin } = await import("@/lib/supabase");
-    const { data: custom } = await supabaseAdmin()
-      .from("spare_parts_custom")
-      .select("*")
-      .eq("is_deleted", false)
-      .order("created_at", { ascending: true });
-
-    if (custom && custom.length > 0) {
-      custom.forEach((row: { product: string; spare_part: string; max_b2c: string; min_b2b: string; gst: string }) => {
-        const idx = priceList.findIndex(
-          (r) => r.Product === row.product && r.SparePart === row.spare_part
-        );
-        const mapped = { Product: row.product, SparePart: row.spare_part, MaxB2C: row.max_b2c || "", MinB2B: row.min_b2b || "", GST: row.gst || "" };
-        if (idx >= 0) {
-          priceList[idx] = mapped; // override
-        } else {
-          priceList.push(mapped); // new entry
-        }
+    const token = await getGoogleAccessToken();
+    const rows = await sheetsGet(token, CUSTOM_TAB);
+    if (rows.length > 1) {
+      // rows[0] = headers, rows[1..] = data
+      rows.slice(1).forEach((row) => {
+        const [product, sparePart, maxB2C, minB2B, gst] = row;
+        if (!product || !sparePart) return;
+        const idx = priceList.findIndex(r => r.Product === product && r.SparePart === sparePart);
+        const mapped = { Product: product, SparePart: sparePart, MaxB2C: maxB2C || "", MinB2B: minB2B || "", GST: gst || "" };
+        if (idx >= 0) priceList[idx] = mapped;
+        else priceList.push(mapped);
       });
     }
   } catch {
-    // Supabase not configured or tables don't exist — use static data only
+    // Google Sheets not configured — use static data only
   }
 
   return NextResponse.json({ productMaster, priceList, repairLog });
@@ -37,7 +83,6 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { supabaseAdmin } = await import("@/lib/supabase");
     const body = await request.json();
     const { product, sparePart, maxB2C, minB2B, gst, changedBy, isNew } = body;
 
@@ -45,49 +90,55 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "product, sparePart and changedBy are required" }, { status: 400 });
     }
 
-    // Get old values for history
+    const token = await getGoogleAccessToken();
+    await ensureTab(token, CUSTOM_TAB,  CUSTOM_HEADERS);
+    await ensureTab(token, HISTORY_TAB, HISTORY_HEADERS);
+
+    // Read existing custom rows to find old values + row index
+    const rows = await sheetsGet(token, CUSTOM_TAB);
+    const headers = rows[0] ?? CUSTOM_HEADERS;
+    const pIdx = headers.indexOf("Product");
+    const sIdx = headers.indexOf("Spare Part");
+
+    const existingRowIdx = rows.slice(1).findIndex(
+      (r) => r[pIdx] === product && r[sIdx] === sparePart
+    );
+
+    // Get old values from static base or existing sheet row
     const priceList = priceListBase as { Product: string; SparePart: string; MaxB2C: string; MinB2B: string; GST: string }[];
-    const existing = priceList.find((r) => r.Product === product && r.SparePart === sparePart);
+    const staticRow = priceList.find(r => r.Product === product && r.SparePart === sparePart);
+    const existingRow = existingRowIdx >= 0 ? rows[existingRowIdx + 1] : null;
 
-    // Upsert into spare_parts_custom
-    const { error: upsertError } = await supabaseAdmin()
-      .from("spare_parts_custom")
-      .upsert(
-        {
-          product,
-          spare_part: sparePart,
-          max_b2c: maxB2C || "",
-          min_b2b: minB2B || "",
-          gst: gst || "",
-          is_deleted: false,
-          created_by: changedBy,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "product,spare_part" }
-      );
+    const oldMax = existingRow?.[headers.indexOf("Max B2C")] ?? staticRow?.MaxB2C ?? "";
+    const oldMin = existingRow?.[headers.indexOf("Min B2B")] ?? staticRow?.MinB2B ?? "";
+    const oldGst = existingRow?.[headers.indexOf("GST")]     ?? staticRow?.GST     ?? "";
 
-    if (upsertError) throw new Error(upsertError.message);
+    const now = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+    const newRow = [product, sparePart, maxB2C || "", minB2B || "", gst || "", changedBy, now];
 
-    // Log history entries for changed fields
-    const historyRows = [];
-    if (isNew) {
-      historyRows.push({ product, spare_part: sparePart, field_changed: "new_part", old_value: "", new_value: `Max:${maxB2C} Min:${minB2B} GST:${gst}`, changed_by: changedBy });
+    if (existingRowIdx >= 0) {
+      // Update existing row (sheet row = existingRowIdx + 2 because row 1 = headers)
+      const sheetRow = existingRowIdx + 2;
+      await sheetsUpdate(token, `${CUSTOM_TAB}!A${sheetRow}:G${sheetRow}`, [newRow]);
     } else {
-      if (existing?.MaxB2C !== maxB2C) historyRows.push({ product, spare_part: sparePart, field_changed: "Max B2C", old_value: existing?.MaxB2C || "", new_value: maxB2C || "", changed_by: changedBy });
-      if (existing?.MinB2B !== minB2B) historyRows.push({ product, spare_part: sparePart, field_changed: "Min B2B", old_value: existing?.MinB2B || "", new_value: minB2B || "", changed_by: changedBy });
-      if (existing?.GST !== gst) historyRows.push({ product, spare_part: sparePart, field_changed: "GST", old_value: existing?.GST || "", new_value: gst || "", changed_by: changedBy });
+      await sheetsAppend(token, CUSTOM_TAB, [newRow]);
     }
 
+    // Log history
+    const historyRows: string[][] = [];
+    if (isNew) {
+      historyRows.push([product, sparePart, "new_part", "", `Max:${maxB2C} Min:${minB2B} GST:${gst}`, changedBy, now]);
+    } else {
+      if (oldMax !== (maxB2C || "")) historyRows.push([product, sparePart, "Max B2C", oldMax, maxB2C || "", changedBy, now]);
+      if (oldMin !== (minB2B || "")) historyRows.push([product, sparePart, "Min B2B", oldMin, minB2B || "", changedBy, now]);
+      if (oldGst !== (gst    || "")) historyRows.push([product, sparePart, "GST",     oldGst, gst    || "", changedBy, now]);
+    }
     if (historyRows.length > 0) {
-      await supabaseAdmin().from("spare_parts_history").insert(historyRows);
+      await sheetsAppend(token, HISTORY_TAB, historyRows);
     }
 
     return NextResponse.json({ ok: true });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Unknown error";
-    if (msg.includes("does not exist") || msg.includes("schema cache") || msg.includes("relation") || msg.includes("42P01")) {
-      return NextResponse.json({ error: "TABLES_NOT_SETUP", message: "Run the setup SQL in your Supabase dashboard first." }, { status: 503 });
-    }
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return NextResponse.json({ error: (err as Error).message }, { status: 500 });
   }
 }

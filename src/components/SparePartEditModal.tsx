@@ -26,7 +26,6 @@ export default function SparePartEditModal({ row, product, onClose, onSaved }: P
   const [history, setHistory]     = useState<HistoryRow[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
-  const [setupNeeded, setSetupNeeded] = useState(false);
 
   // Load history for this specific part
   async function loadHistory() {
@@ -68,10 +67,7 @@ export default function SparePartEditModal({ row, product, onClose, onSaved }: P
         }),
       });
       const j = await res.json();
-      if (!res.ok) {
-        if (j.error === "TABLES_NOT_SETUP") { setSetupNeeded(true); return; }
-        throw new Error(j.error || "Save failed");
-      }
+      if (!res.ok) throw new Error(j.error || "Save failed");
       onSaved();
       onClose();
     } catch (e) {
@@ -98,39 +94,7 @@ export default function SparePartEditModal({ row, product, onClose, onSaved }: P
           </button>
         </div>
 
-        {setupNeeded ? (
-          <div className="px-5 py-6">
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-800 space-y-2">
-              <p className="font-semibold text-sm">⚙️ One-time database setup needed</p>
-              <p>Ask Asis to run this SQL in the Supabase dashboard (SQL Editor):</p>
-              <pre className="bg-white border border-amber-200 rounded p-3 text-[10px] overflow-x-auto whitespace-pre-wrap text-slate-700 select-all">{`CREATE TABLE spare_parts_custom (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  product TEXT NOT NULL,
-  spare_part TEXT NOT NULL,
-  max_b2c TEXT DEFAULT '',
-  min_b2b TEXT DEFAULT '',
-  gst TEXT DEFAULT '',
-  is_deleted BOOLEAN DEFAULT FALSE,
-  created_by TEXT DEFAULT '',
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(product, spare_part)
-);
-CREATE TABLE spare_parts_history (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  product TEXT NOT NULL,
-  spare_part TEXT NOT NULL,
-  field_changed TEXT NOT NULL,
-  old_value TEXT DEFAULT '',
-  new_value TEXT DEFAULT '',
-  changed_by TEXT NOT NULL,
-  changed_at TIMESTAMPTZ DEFAULT NOW()
-);`}</pre>
-              <p className="text-amber-700">After running, click Save again.</p>
-            </div>
-            <button onClick={() => setSetupNeeded(false)} className="mt-3 text-xs text-indigo-600 hover:underline">← Go back</button>
-          </div>
-        ) : (
+        {(
           <div className="px-5 py-4 space-y-3">
             {/* Spare part name */}
             <div>
@@ -198,7 +162,7 @@ CREATE TABLE spare_parts_history (
         )}
 
         {/* History panel */}
-        {showHistory && !setupNeeded && (
+        {showHistory && (
           <div className="px-5 pb-4 border-t border-slate-100 mt-1">
             <p className="text-xs font-semibold text-slate-500 mt-3 mb-2">Edit History — {row?.SparePart}</p>
             {historyLoading ? (
