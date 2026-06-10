@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+export const dynamic = "force-dynamic";
+
 import productMaster from "@/data/product-master.json";
 import priceListBase from "@/data/price-list.json";
 import repairLog from "@/data/repair-log.json";
@@ -13,10 +15,11 @@ const HISTORY_TAB  = "Spare Parts History";
 const CUSTOM_HEADERS  = ["Product", "Spare Part", "Max B2C", "Min B2B", "GST", "Updated By", "Updated At"];
 const HISTORY_HEADERS = ["Product", "Spare Part", "Field Changed", "Old Value", "New Value", "Changed By", "Changed At"];
 
+const NO_CACHE = { cache: "no-store" as const };
+
 async function sheetsGet(token: string, tab: string): Promise<string[][]> {
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${BOT_SHEET_ID}/values/${encodeURIComponent(tab)}`;
-  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-  if (res.status === 400) return []; // tab doesn't exist yet
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` }, ...NO_CACHE });
   if (!res.ok) return [];
   const j = await res.json();
   return (j.values as string[][]) ?? [];
@@ -24,36 +27,55 @@ async function sheetsGet(token: string, tab: string): Promise<string[][]> {
 
 async function sheetsAppend(token: string, tab: string, values: string[][]): Promise<void> {
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${BOT_SHEET_ID}/values/${encodeURIComponent(tab)}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
-  await fetch(url, {
+  const res = await fetch(url, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify({ values }),
+    ...NO_CACHE,
   });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`Sheets append failed: ${res.status} — ${body.slice(0, 200)}`);
+  }
 }
 
 async function sheetsUpdate(token: string, range: string, values: string[][]): Promise<void> {
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${BOT_SHEET_ID}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
-  await fetch(url, {
+  const res = await fetch(url, {
     method: "PUT",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify({ values }),
+    ...NO_CACHE,
   });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`Sheets update failed: ${res.status} — ${body.slice(0, 200)}`);
+  }
 }
 
 async function ensureTab(token: string, title: string, headers: string[]): Promise<void> {
-  // Try reading; if 400, create the tab
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${BOT_SHEET_ID}/values/${encodeURIComponent(title)}`;
-  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-  if (res.ok) return; // tab exists
-
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` }, ...NO_CACHE });
+  if (res.ok) {
+    const j = await res.json();
+    // Tab exists but might be empty — add headers if no rows
+    if (!j.values || j.values.length === 0) {
+      await sheetsAppend(token, title, [headers]);
+    }
+    return;
+  }
   // Create tab
   const batchUrl = `https://sheets.googleapis.com/v4/spreadsheets/${BOT_SHEET_ID}:batchUpdate`;
-  await fetch(batchUrl, {
+  const bRes = await fetch(batchUrl, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify({ requests: [{ addSheet: { properties: { title } } }] }),
+    ...NO_CACHE,
   });
-  // Add headers
+  if (!bRes.ok) {
+    const body = await bRes.text().catch(() => "");
+    throw new Error(`Could not create tab "${title}": ${bRes.status} — ${body.slice(0, 200)}`);
+  }
   await sheetsAppend(token, title, [headers]);
 }
 

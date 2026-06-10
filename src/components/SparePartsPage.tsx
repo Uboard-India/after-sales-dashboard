@@ -154,8 +154,10 @@ export default function SparePartsPage() {
               onClose={() => setEditRow(null)}
               onSaved={() => {
                 setEditRow(null);
-                // Reload data to reflect edits
-                fetch("/api/spareparts").then(r => r.json()).then((d: SparePartsData) => setData(d));
+                // Force reload — bypass any browser cache
+                fetch(`/api/spareparts?t=${Date.now()}`, { cache: "no-store" })
+                  .then(r => r.json())
+                  .then((d: SparePartsData) => setData(d));
               }}
             />
           )}
