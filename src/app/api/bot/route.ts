@@ -42,7 +42,7 @@ function mapCategory(raw: string): string {
   return v;
 }
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     const rows = await fetchSheetRows(BOT_SHEET_ID);
     const csv = rowsToCSV(rows);
@@ -78,6 +78,23 @@ export async function GET() {
         hasMobile: cleanMobile(r["CALL BACK NUMBER"] || "") !== "",
         };
       });
+
+    // Debug view: /api/bot?summary=1 — shows detected column + bucket counts
+    if (new URL(req.url).searchParams.get("summary")) {
+      const headers = rows[0] ?? [];
+      const regHeader =
+        headers.find((h) => /complaint\s*registered\s*to/i.test(h)) ||
+        headers.find((h) => /regist/i.test(h)) ||
+        "NOT FOUND — using CATEGORY fallback";
+      const counts: Record<string, number> = {};
+      for (const e of entries) counts[e.category] = (counts[e.category] ?? 0) + 1;
+      return NextResponse.json({
+        totalEntries: entries.length,
+        registeredToColumn: regHeader,
+        allHeaders: headers,
+        categoryCounts: counts,
+      });
+    }
 
     return NextResponse.json({ entries, total: entries.length });
   } catch (err) {
