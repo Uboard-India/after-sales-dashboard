@@ -37,7 +37,7 @@ const STATUS_COLOR: Record<string, string> = {
   "Close Ticket":                  "bg-green-100 text-green-700",
 };
 
-const TEAM = ["Prachi", "Adil", "Altab", "Asis"];
+import { TEAM } from "@/lib/ticketOptions";
 
 function UpdatePageInner() {
   const params    = useSearchParams();

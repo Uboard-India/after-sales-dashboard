@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 import type { ComplaintRow, ApiResponse } from "@/lib/types";
+import { TEAM as TEAM_OPTIONS } from "@/lib/ticketOptions";
 
 interface BotEntry {
   botId: string;
@@ -23,6 +24,7 @@ interface BotEntry {
   customerName: string;
   hasMobile: boolean;
   month: string;
+  category: string;
 }
 
 interface Match {
@@ -108,7 +110,7 @@ export default function VerifyPage() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [verifiedBy, setVerifiedBy] = useState("");
 
-  const TEAM = ["Prachi", "Adil", "Altab", "Asis"];
+  const TEAM = TEAM_OPTIONS;
 
   useEffect(() => {
     // Restore name from localStorage
@@ -171,11 +173,11 @@ export default function VerifyPage() {
   }
 
   // Unique persons from category field (e.g. "Prachi Bot", "Adil Bot")
-  const personOptions = ["All", ...Array.from(new Set(botEntries.map((e) => (e as BotEntry & { category?: string }).category || "").filter(Boolean))).sort()];
+  const personOptions = ["All", ...Array.from(new Set(botEntries.map((e) => e.category).filter(Boolean))).sort()];
 
   const pending = botEntries
     .filter((e) => !decisions[e.botId])
-    .filter((e) => filterPerson === "All" || (e as BotEntry & { category?: string }).category === filterPerson)
+    .filter((e) => filterPerson === "All" || e.category === filterPerson)
     .sort((a, b) => {
       if (sortBy === "newest") {
         const d = parseTs(b.timestamp) - parseTs(a.timestamp);

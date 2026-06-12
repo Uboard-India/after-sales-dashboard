@@ -18,4 +18,4 @@ export const STATUS_OPTIONS = [
   "Close Ticket",
 ] as const;
 
-export const TEAM = ["Prachi", "Adil", "Altab", "Asis"] as const;
+export const TEAM = ["Prachi", "Adil", "Altab", "Asis", "Neha"] as const;

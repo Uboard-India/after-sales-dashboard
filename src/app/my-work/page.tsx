@@ -6,8 +6,7 @@ import { Loader2, Pencil, Phone, AlertTriangle, CheckCircle2, Clock, User } from
 import type { ComplaintRow, ApiResponse } from "@/lib/types";
 import { deriveBucket } from "@/lib/buckets";
 import { BUCKET_OWNER } from "@/lib/types";
-
-const TEAM = ["Prachi", "Adil", "Altab", "Asis"];
+import { TEAM } from "@/lib/ticketOptions";
 
 const STATUS_BADGE: Record<string, string> = {
   "Complaint Register":            "bg-blue-100 text-blue-700",

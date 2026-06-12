@@ -12,7 +12,7 @@ const STATUS_OPTIONS = [
   "Dispatch But Not Delivered", "Payment due from Customer",
   "Re-Open Ticket", "Close Ticket",
 ];
-const TEAM = ["Prachi", "Adil", "Altab", "Asis"];
+import { TEAM } from "@/lib/ticketOptions";
 
 interface Props {
   rows: ComplaintRow[];
