@@ -48,7 +48,29 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
   const [quickDone, setQuickDone]       = useState<Record<string, string>>({}); // optimistic: id → new status
   const [quickMsg, setQuickMsg]         = useState<{ kind: "ok" | "warn" | "err"; text: string } | null>(null);
   const [askName, setAskName]           = useState<{ id: string; value: string; mobile: string } | null>(null);
+  // Read-only change-history popup
+  const [historyFor, setHistoryFor]     = useState<ComplaintRow | null>(null);
+  const [historyRows, setHistoryRows]   = useState<{ field: string; value: string; note: string | null; updated_by: string; created_at: string }[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const PER_PAGE = 15;
+
+  function openHistory(r: ComplaintRow) {
+    setHistoryFor(r);
+    setHistoryLoading(true);
+    fetch(`/api/updates?complaintId=${encodeURIComponent(r.id)}`)
+      .then((res) => res.json())
+      .then((j) => setHistoryRows(j.history ?? []))
+      .catch(() => setHistoryRows([]))
+      .finally(() => setHistoryLoading(false));
+  }
+
+  /** "12 Jun, 4:32 pm" from an ISO timestamp. */
+  function fmtWhen(iso: string): string {
+    const d = new Date(iso);
+    return isNaN(d.getTime())
+      ? ""
+      : d.toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "numeric", minute: "2-digit" });
+  }
 
   async function doQuickSave(id: string, value: string, mobile: string, name: string) {
     setQuickSaving(id);
@@ -311,6 +333,7 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
                   <span className="text-[10px] group-hover:text-indigo-600">{sortDate === "asc" ? "↑" : "↓"}</span>
                 </button>
               </th>
+              <th className="text-left font-medium text-slate-400 pb-2 pr-3 whitespace-nowrap">Last Update</th>
               <th className="text-left font-medium text-slate-400 pb-2 whitespace-nowrap">Action</th>
             </tr>
           </thead>
@@ -389,6 +412,22 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
                   })() : <span className="text-slate-300">—</span>}
                 </td>
                 <td className="py-2 pr-3 text-slate-600 whitespace-nowrap">{r.complaintDate}</td>
+                <td className="py-2 pr-3 whitespace-nowrap">
+                  {r.overlayUpdatedBy ? (
+                    <button
+                      onClick={() => openHistory(r)}
+                      title="View full change history"
+                      className="text-left hover:bg-indigo-50 rounded-md px-1.5 py-0.5 -mx-1.5 transition"
+                    >
+                      <span className="text-slate-700 font-medium">{r.overlayUpdatedBy}</span>
+                      <span className="text-slate-400 block text-[10px] leading-tight">
+                        {r.overlayUpdatedAt ? fmtWhen(r.overlayUpdatedAt) : ""}
+                      </span>
+                    </button>
+                  ) : (
+                    <span className="text-slate-300">—</span>
+                  )}
+                </td>
                 <td className="py-2">
                   <Link
                     href={`/update?id=${encodeURIComponent(r.id)}`}
@@ -402,7 +441,7 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
             ))}
             {paged.length === 0 && (
               <tr>
-                <td colSpan={13} className="py-8 text-center text-slate-400">No tickets match the filters</td>
+                <td colSpan={14} className="py-8 text-center text-slate-400">No tickets match the filters</td>
               </tr>
             )}
           </tbody>
@@ -424,6 +463,51 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
               disabled={page === totalPages}
               className="text-xs px-2 py-1 rounded border border-slate-200 disabled:opacity-40 hover:bg-slate-50"
             >Next</button>
+          </div>
+        </div>
+      )}
+
+      {/* Read-only change history popup */}
+      {historyFor && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setHistoryFor(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-800">
+                  History — #{historyFor.sequenceNo} {historyFor.customerName || ""}
+                </h3>
+                <p className="text-xs text-slate-400">{historyFor.productName} · {historyFor.brand}</p>
+              </div>
+              <button onClick={() => setHistoryFor(null)} className="text-slate-400 hover:text-slate-600">
+                <X size={16} />
+              </button>
+            </div>
+            <div className="px-5 py-4 max-h-80 overflow-y-auto">
+              {historyLoading ? (
+                <div className="flex justify-center py-6">
+                  <Loader2 size={18} className="animate-spin text-indigo-400" />
+                </div>
+              ) : historyRows.length === 0 ? (
+                <p className="text-xs text-slate-400 text-center py-6">No dashboard updates recorded yet.</p>
+              ) : (
+                <div className="space-y-3">
+                  {historyRows.map((h, i) => (
+                    <div key={i} className="text-xs border-l-2 border-indigo-100 pl-3">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-semibold text-slate-700 capitalize">{h.field.replace("_", " ")}</span>
+                        <span className="text-slate-400">→</span>
+                        <span className="text-indigo-700 font-medium">{h.value || "—"}</span>
+                      </div>
+                      <p className="text-slate-500 mt-0.5">
+                        by <span className="font-medium text-slate-600">{h.updated_by}</span>
+                        <span className="text-slate-400"> · {fmtWhen(h.created_at)}</span>
+                      </p>
+                      {h.note && <p className="text-slate-400 italic mt-0.5">{h.note}</p>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
