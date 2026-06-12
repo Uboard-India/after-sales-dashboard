@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import Link from "next/link";
-import { Search, X, Pencil, Phone, CheckSquare, Square, Loader2, ChevronDown } from "lucide-react";
+import { Search, X, Phone, CheckSquare, Square, Loader2, ChevronDown } from "lucide-react";
 import type { ComplaintRow } from "@/lib/types";
 import { STATUS_OPTIONS, TEAM } from "@/lib/ticketOptions";
 
@@ -333,8 +332,7 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
                   <span className="text-[10px] group-hover:text-indigo-600">{sortDate === "asc" ? "↑" : "↓"}</span>
                 </button>
               </th>
-              <th className="text-left font-medium text-slate-400 pb-2 pr-3 whitespace-nowrap">Last Update</th>
-              <th className="text-left font-medium text-slate-400 pb-2 whitespace-nowrap">Action</th>
+              <th className="text-left font-medium text-slate-400 pb-2 whitespace-nowrap">Last Update</th>
             </tr>
           </thead>
           <tbody>
@@ -412,7 +410,7 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
                   })() : <span className="text-slate-300">—</span>}
                 </td>
                 <td className="py-2 pr-3 text-slate-600 whitespace-nowrap">{r.complaintDate}</td>
-                <td className="py-2 pr-3 whitespace-nowrap">
+                <td className="py-2 whitespace-nowrap">
                   {r.overlayUpdatedBy ? (
                     <button
                       onClick={() => openHistory(r)}
@@ -428,20 +426,11 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
                     <span className="text-slate-300">—</span>
                   )}
                 </td>
-                <td className="py-2">
-                  <Link
-                    href={`/update?id=${encodeURIComponent(r.id)}`}
-                    className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition whitespace-nowrap"
-                    title="Update this ticket"
-                  >
-                    <Pencil size={11} /> Update
-                  </Link>
-                </td>
               </tr>
             ))}
             {paged.length === 0 && (
               <tr>
-                <td colSpan={14} className="py-8 text-center text-slate-400">No tickets match the filters</td>
+                <td colSpan={13} className="py-8 text-center text-slate-400">No tickets match the filters</td>
               </tr>
             )}
           </tbody>
