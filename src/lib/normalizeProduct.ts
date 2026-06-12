@@ -11,8 +11,9 @@
 const PRODUCT_MAP: Record<string, string> = {
   // Scooters
   "2wheelscooter": "2 Wheel Scooter",
-  "tygatec2wheelscooterblue": "2 Wheel Scooter",
-  "tygatec2wheelscooterred": "2 Wheel Scooter",
+  "tygatec2wheelscooter": "Tygatec 2 Wheel Scooter",
+  "tygatec2wheelscooterblue": "Tygatec 2 Wheel Scooter",
+  "tygatec2wheelscooterred": "Tygatec 2 Wheel Scooter",
   "3wheelscooter": "3 Wheel Scooter",
   "tygatec3wheelscooter": "3 Wheel Scooter",
   "tygatec3wheelscooteryellow": "3 Wheel Scooter",
@@ -30,7 +31,7 @@ const PRODUCT_MAP: Record<string, string> = {
   "classic65": "Classic 6.5",
   "classsic65": "Classic 6.5",
   "classic65storepic": "Classic 6.5",
-  "classic65demo": "Classic 6.5",
+  "classic65demo": "Classic 6.5 Demo",
   "classic65hb": "Classic 6.5",
   "classic65lite": "Classic 6.5 Lite",
   "classiclite": "Classic 6.5 Lite",
@@ -55,7 +56,7 @@ const PRODUCT_MAP: Record<string, string> = {
   "a1": "A1",
   "mini8": "Mini 8",
   "mini10": "Mini 10",
-  "mini10explorer": "Mini 10",
+  "mini10explorer": "Mini 10 Explorer",
 
   // Tygatec T-series
   "t1": "T1",
@@ -71,7 +72,7 @@ const PRODUCT_MAP: Record<string, string> = {
   "discoverybike": "Discovery Bike",
   "discoverymini": "Discovery Mini",
   "pathfinder": "Pathfinder",
-  "pathfinderbike": "Pathfinder",
+  "pathfinderbike": "Pathfinder Bike",
 
   // E-kick
   "ekick": "E Kick",
