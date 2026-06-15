@@ -18,6 +18,7 @@ export interface ComplaintRow {
   headRemarks: string;
   uboardRemarks: string;
   paymentType: string;
+  paymentReceived: string;
   closeDate: string;
   returnPickupDate: string;
   productReceivedDate: string;
