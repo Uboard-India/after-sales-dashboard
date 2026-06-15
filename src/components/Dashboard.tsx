@@ -129,7 +129,7 @@ export default function Dashboard() {
       }
       return true;
     });
-  }, [data, filterYear, filterBrand, filterComplaintType, filterMonth, rangeCutoff]);
+  }, [data, filterYear, filterBrand, filterProduct, filterComplaintType, filterMonth, rangeCutoff]);
 
   // KPIs
   const kpis = useMemo(() => {
@@ -324,7 +324,7 @@ export default function Dashboard() {
           <button
             onClick={() => {
               const latest = years[years.length - 1] || "All";
-              setFilterYear(latest); setFilterBrand("All"); setFilterComplaintType("All"); setFilterMonth("All"); setFilterRange("All");
+              setFilterYear(latest); setFilterBrand("All"); setFilterProduct("All"); setFilterComplaintType("All"); setFilterMonth("All"); setFilterRange("All");
             }}
             className="text-xs text-indigo-600 hover:underline self-center"
           >
