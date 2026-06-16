@@ -114,7 +114,7 @@ export default function PaymentTable({ rows }: Props) {
         <table className="w-full text-xs">
           <thead>
             <tr className="border-b border-slate-100">
-              {["#", "Close Date", "Customer", "Product", "Brand", "Warranty", "Amount", "Payment Type", "Status"].map((h) => (
+              {["#", "Close Date", "Customer", "Request By", "Product", "Brand", "Warranty", "Amount", "Payment Type", "Status"].map((h) => (
                 <th key={h} className="text-left font-medium text-slate-400 pb-2 pr-3 whitespace-nowrap">{h}</th>
               ))}
             </tr>
@@ -127,6 +127,7 @@ export default function PaymentTable({ rows }: Props) {
                   <td className="py-2 pr-3 text-slate-400 font-mono">{r.sequenceNo}</td>
                   <td className="py-2 pr-3 text-slate-600 whitespace-nowrap">{r.closeDate || "—"}</td>
                   <td className="py-2 pr-3 text-slate-700 whitespace-nowrap">{r.customerName || "—"}</td>
+                  <td className="py-2 pr-3 text-slate-600 whitespace-nowrap">{r.requestBy || "—"}</td>
                   <td className="py-2 pr-3 text-slate-700 whitespace-nowrap">{r.productName || "—"}</td>
                   <td className="py-2 pr-3"><span className="px-1.5 py-0.5 rounded text-xs bg-slate-100 text-slate-600">{r.brand}</span></td>
                   <td className="py-2 pr-3 whitespace-nowrap">
@@ -143,7 +144,7 @@ export default function PaymentTable({ rows }: Props) {
               );
             })}
             {paged.length === 0 && (
-              <tr><td colSpan={9} className="py-8 text-center text-slate-400">No closed tickets match the filters</td></tr>
+              <tr><td colSpan={10} className="py-8 text-center text-slate-400">No closed tickets match the filters</td></tr>
             )}
           </tbody>
         </table>

@@ -479,12 +479,13 @@ export default function Dashboard() {
         {/* Request By Table */}
         <RequestByTable data={requestByData} />
 
-        {/* Payment Tracking — closed tickets, payment pending (esp. out of warranty) */}
-        <PaymentTable rows={filtered} />
-
         {/* Open Tickets Table — receives all filtered rows; shows open by
             default, and closed ones when the Status filter selects them. */}
         <OpenTicketsTable rows={filtered} onSaved={handleRefresh} />
+
+        {/* Payment Tracking — below open complaints: closed tickets, payment
+            pending (esp. out of warranty) */}
+        <PaymentTable rows={filtered} />
       </main>
 
     </div>
