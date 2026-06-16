@@ -482,8 +482,9 @@ export default function Dashboard() {
         {/* Payment Tracking — closed tickets, payment pending (esp. out of warranty) */}
         <PaymentTable rows={filtered} />
 
-        {/* Open Tickets Table */}
-        <OpenTicketsTable rows={openTickets} onSaved={handleRefresh} />
+        {/* Open Tickets Table — receives all filtered rows; shows open by
+            default, and closed ones when the Status filter selects them. */}
+        <OpenTicketsTable rows={filtered} onSaved={handleRefresh} />
       </main>
 
     </div>

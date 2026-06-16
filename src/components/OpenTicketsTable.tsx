@@ -113,6 +113,8 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
     doQuickSave(r.id, value, r.customerMobile, name);
   }
 
+  const openCount = useMemo(() => rows.filter((r) => r.isOpen).length, [rows]);
+
   // Build dropdown options from the incoming rows
   const opts = useMemo(() => ({
     requested: uniq(rows.map((r) => r.requestBy)),
@@ -135,12 +137,16 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     const base = rows.filter((r) => {
-      if (filterRequested !== "All" && r.requestBy !== filterRequested) return false;
-      if (filterProduct   !== "All" && r.productName !== filterProduct)  return false;
-      if (filterStatus    !== "All") {
+      // Default (Status = All) shows only OPEN tickets. Picking a specific
+      // status — including "Close Ticket" — shows matching tickets even if closed.
+      if (filterStatus === "All") {
+        if (!r.isOpen) return false;
+      } else {
         const s = r.actionTaken || "Registered";
         if (s !== filterStatus) return false;
       }
+      if (filterRequested !== "All" && r.requestBy !== filterRequested) return false;
+      if (filterProduct   !== "All" && r.productName !== filterProduct)  return false;
       if (filterIssue  !== "All" && r.issueType !== filterIssue)         return false;
       if (filterBrand  !== "All" && r.brand     !== filterBrand)         return false;
       // Pending Since filter
@@ -266,9 +272,11 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
         <div>
-          <h2 className="text-sm font-semibold text-slate-700">Open Tickets</h2>
+          <h2 className="text-sm font-semibold text-slate-700">
+            {filterStatus === "Close Ticket" ? "Closed Tickets" : "Open Tickets"}
+          </h2>
           <p className="text-xs text-slate-400">
-            {filtered.length} of {rows.length} open complaints
+            {filtered.length} shown · {openCount} open
           </p>
         </div>
         <div className="relative">
