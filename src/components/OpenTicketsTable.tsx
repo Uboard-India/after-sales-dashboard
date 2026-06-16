@@ -275,10 +275,10 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
           <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
-            placeholder="Search customer, mobile, product…"
+            placeholder="Search complaint no, customer, mobile, product…"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            className="pl-8 pr-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 w-64"
+            className="pl-8 pr-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 w-80"
           />
         </div>
       </div>
