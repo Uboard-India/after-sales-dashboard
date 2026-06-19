@@ -29,10 +29,14 @@ function topBy(rows: ComplaintRow[], pick: (r: ComplaintRow) => string, n = 8) {
 
 export default function PlatformBreakdown({ rows }: Props) {
   const [selected, setSelected] = useState<string | null>(null);
+  const [openOnly, setOpenOnly] = useState(false);
+
+  // Apply the open-only toggle before everything else.
+  const scoped = useMemo(() => (openOnly ? rows.filter((r) => r.isOpen) : rows), [rows, openOnly]);
 
   const platformData = useMemo(() => {
     const map = new Map<string, { open: number; closed: number }>();
-    for (const r of rows) {
+    for (const r of scoped) {
       const k = r.platform || "Other";
       const e = map.get(k) ?? { open: 0, closed: 0 };
       if (r.isOpen) e.open++; else e.closed++;
@@ -41,11 +45,11 @@ export default function PlatformBreakdown({ rows }: Props) {
     return Array.from(map.entries())
       .map(([name, v]) => ({ name, ...v, total: v.open + v.closed }))
       .sort((a, b) => b.total - a.total);
-  }, [rows]);
+  }, [scoped]);
 
   const selectedRows = useMemo(
-    () => (selected ? rows.filter((r) => (r.platform || "Other") === selected) : []),
-    [rows, selected]
+    () => (selected ? scoped.filter((r) => (r.platform || "Other") === selected) : []),
+    [scoped, selected]
   );
   const byProduct = useMemo(() => topBy(selectedRows, (r) => r.productName), [selectedRows]);
   const byIssue = useMemo(() => topBy(selectedRows, (r) => r.issueType), [selectedRows]);
@@ -56,7 +60,23 @@ export default function PlatformBreakdown({ rows }: Props) {
       <div className="flex items-center gap-2 mb-1">
         <Store size={15} className="text-indigo-600" />
         <h2 className="text-sm font-semibold text-slate-700">Complaints by Platform</h2>
-        <span className="text-xs text-slate-400">· click a platform for product &amp; issue details</span>
+        <span className="text-xs text-slate-400 hidden sm:inline">· click a platform for product &amp; issue details</span>
+        <div className="ml-auto flex rounded-lg overflow-hidden border border-slate-200">
+          {[
+            { k: false, label: "All" },
+            { k: true, label: "Open only" },
+          ].map((o) => (
+            <button
+              key={o.label}
+              onClick={() => setOpenOnly(o.k)}
+              className={`text-xs px-3 py-1 font-medium transition ${
+                openOnly === o.k ? "bg-indigo-600 text-white" : "bg-white text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <ResponsiveContainer width="100%" height={Math.max(160, platformData.length * 34)}>

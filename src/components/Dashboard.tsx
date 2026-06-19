@@ -44,6 +44,7 @@ export default function Dashboard() {
   const [filterYear, setFilterYear] = useState("");
   const [filterBrand, setFilterBrand] = useState("All");
   const [filterProduct, setFilterProduct] = useState("All");
+  const [filterPlatform, setFilterPlatform] = useState("All");
   const [filterComplaintType, setFilterComplaintType] = useState("All");
   const [filterMonth, setFilterMonth] = useState("All");
   const [filterRange, setFilterRange] = useState<"All" | "3m" | "6m" | "12m">("All");
@@ -92,6 +93,11 @@ export default function Dashboard() {
     return ["All", ...Array.from(s).sort()];
   }, [data]);
 
+  const platforms = useMemo(() => {
+    const s = new Set(data.map((r) => r.platform).filter(Boolean));
+    return ["All", ...Array.from(s).sort()];
+  }, [data]);
+
   const months = useMemo(() => {
     const s = new Set(data.map((r) => r.monthYear).filter(Boolean));
     const sorted = Array.from(s).sort(
@@ -123,6 +129,7 @@ export default function Dashboard() {
       if (filterYear !== "All" && r.fiscalYear !== filterYear) return false;
       if (filterBrand !== "All" && r.brand !== filterBrand) return false;
       if (filterProduct !== "All" && r.productName !== filterProduct) return false;
+      if (filterPlatform !== "All" && r.platform !== filterPlatform) return false;
       if (filterComplaintType !== "All" && r.complaintType !== filterComplaintType) return false;
       if (filterMonth !== "All" && r.monthYear !== filterMonth) return false;
       if (rangeCutoff > 0) {
@@ -131,7 +138,7 @@ export default function Dashboard() {
       }
       return true;
     });
-  }, [data, filterYear, filterBrand, filterProduct, filterComplaintType, filterMonth, rangeCutoff]);
+  }, [data, filterYear, filterBrand, filterProduct, filterPlatform, filterComplaintType, filterMonth, rangeCutoff]);
 
   // KPIs
   const kpis = useMemo(() => {
@@ -321,12 +328,13 @@ export default function Dashboard() {
           <FilterSelect label="FY"      value={filterYear}            options={years}   onChange={setFilterYear} />
           <FilterSelect label="Brand"   value={filterBrand}           options={brands}  onChange={setFilterBrand} />
           <FilterSelect label="Product" value={filterProduct}         options={products} onChange={setFilterProduct} />
+          <FilterSelect label="Platform" value={filterPlatform}       options={platforms} onChange={setFilterPlatform} />
           <FilterSelect label="Type"    value={filterComplaintType}   options={["All", "Customer Complaint", "Store Complaint"]} onChange={setFilterComplaintType} />
           <FilterSelect label="Month"   value={filterMonth}           options={months}  onChange={setFilterMonth} />
           <button
             onClick={() => {
               const latest = years[years.length - 1] || "All";
-              setFilterYear(latest); setFilterBrand("All"); setFilterProduct("All"); setFilterComplaintType("All"); setFilterMonth("All"); setFilterRange("All");
+              setFilterYear(latest); setFilterBrand("All"); setFilterProduct("All"); setFilterPlatform("All"); setFilterComplaintType("All"); setFilterMonth("All"); setFilterRange("All");
             }}
             className="text-xs text-indigo-600 hover:underline self-center"
           >
