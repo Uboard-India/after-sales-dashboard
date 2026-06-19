@@ -13,6 +13,7 @@ import IssueTypeChart from "./IssueTypeChart";
 import ProductChart from "./ProductChart";
 import ComplaintTypePie from "./ComplaintTypePie";
 import RequestByTable from "./RequestByTable";
+import PlatformBreakdown from "./PlatformBreakdown";
 import PaymentTable from "./PaymentTable";
 import OpenTicketsTable from "./OpenTicketsTable";
 import IssueByProductTable from "./IssueByProductTable";
@@ -475,6 +476,9 @@ export default function Dashboard() {
           <ProductChart data={productData} allRows={filtered} />
           <IssueByProductTable rows={filtered} />
         </div>
+
+        {/* Complaints by Platform — clickable, drills into products + issues */}
+        <PlatformBreakdown rows={filtered} />
 
         {/* Request By Table */}
         <RequestByTable data={requestByData} />
