@@ -302,6 +302,7 @@ export async function GET() {
             daysInFactory: null,
             ageingDays: ageingBucket(dp),
             isOpen: true,
+            isBot: true,
           };
           rows.push(botRow);
         }

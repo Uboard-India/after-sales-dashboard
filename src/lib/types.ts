@@ -27,6 +27,8 @@ export interface ComplaintRow {
   daysInFactory: number | null;
   ageingDays: string;
   isOpen: boolean;
+  /** True for approved WhatsApp-bot complaints merged from Supabase (not in the sheet). */
+  isBot?: boolean;
   /** Overlay fields — written from the dashboard, stored in Supabase (never in the sheets). */
   assignedTo?: string;
   dashboardRemark?: string;

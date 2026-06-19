@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { RefreshCw, AlertCircle, Factory, Pencil, Bot } from "lucide-react";
+import { RefreshCw, AlertCircle, Factory, Pencil, Bot, ChevronDown, Check, X } from "lucide-react";
 import type { ComplaintRow, ApiResponse } from "@/lib/types";
 import HeroStats from "./HeroStats";
 import KPICard from "./KPICard";
@@ -46,7 +46,7 @@ export default function Dashboard() {
   const [filterProduct, setFilterProduct] = useState("All");
   const [filterPlatform, setFilterPlatform] = useState("All");
   const [filterComplaintType, setFilterComplaintType] = useState("All");
-  const [filterMonth, setFilterMonth] = useState("All");
+  const [filterMonths, setFilterMonths] = useState<string[]>([]); // empty = all months
   const [filterRange, setFilterRange] = useState<"All" | "3m" | "6m" | "12m">("All");
 
   async function fetchData() {
@@ -131,14 +131,14 @@ export default function Dashboard() {
       if (filterProduct !== "All" && r.productName !== filterProduct) return false;
       if (filterPlatform !== "All" && r.platform !== filterPlatform) return false;
       if (filterComplaintType !== "All" && r.complaintType !== filterComplaintType) return false;
-      if (filterMonth !== "All" && r.monthYear !== filterMonth) return false;
+      if (filterMonths.length > 0 && !filterMonths.includes(r.monthYear)) return false;
       if (rangeCutoff > 0) {
         const cd = parseDMYNum(r.complaintDate);
         if (cd === 0 || cd < rangeCutoff) return false;
       }
       return true;
     });
-  }, [data, filterYear, filterBrand, filterProduct, filterPlatform, filterComplaintType, filterMonth, rangeCutoff]);
+  }, [data, filterYear, filterBrand, filterProduct, filterPlatform, filterComplaintType, filterMonths, rangeCutoff]);
 
   // KPIs
   const kpis = useMemo(() => {
@@ -330,11 +330,11 @@ export default function Dashboard() {
           <FilterSelect label="Product" value={filterProduct}         options={products} onChange={setFilterProduct} />
           <FilterSelect label="Platform" value={filterPlatform}       options={platforms} onChange={setFilterPlatform} />
           <FilterSelect label="Type"    value={filterComplaintType}   options={["All", "Customer Complaint", "Store Complaint"]} onChange={setFilterComplaintType} />
-          <FilterSelect label="Month"   value={filterMonth}           options={months}  onChange={setFilterMonth} />
+          <MonthMultiSelect options={months.filter((m) => m !== "All")} selected={filterMonths} onChange={setFilterMonths} />
           <button
             onClick={() => {
               const latest = years[years.length - 1] || "All";
-              setFilterYear(latest); setFilterBrand("All"); setFilterProduct("All"); setFilterPlatform("All"); setFilterComplaintType("All"); setFilterMonth("All"); setFilterRange("All");
+              setFilterYear(latest); setFilterBrand("All"); setFilterProduct("All"); setFilterPlatform("All"); setFilterComplaintType("All"); setFilterMonths([]); setFilterRange("All");
             }}
             className="text-xs text-indigo-600 hover:underline self-center"
           >
@@ -430,7 +430,14 @@ export default function Dashboard() {
                       <tr key={r.id} className={`hover:bg-slate-50 transition ${blank ? "bg-red-50" : ""}`}>
                         <td className="px-4 py-2 font-mono font-semibold text-indigo-600">#{r.sequenceNo}</td>
                         <td className="px-4 py-2 text-slate-500 whitespace-nowrap">{r.complaintDate}</td>
-                        <td className="px-4 py-2 text-slate-700 font-medium">{r.customerName || "—"}</td>
+                        <td className="px-4 py-2 text-slate-700 font-medium whitespace-nowrap">
+                          {r.customerName || "—"}
+                          {r.isBot && (
+                            <span className="ml-1.5 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-violet-100 text-violet-700 align-middle" title="WhatsApp bot complaint — not in the sheet">
+                              <Bot size={9} /> BOT
+                            </span>
+                          )}
+                        </td>
                         <td className="px-4 py-2 text-slate-600 whitespace-nowrap">{r.productName || "—"}</td>
                         <td className="px-4 py-2"><span className="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 text-slate-600">{r.brand || "—"}</span></td>
                         <td className="px-4 py-2 text-slate-500">{r.platform || "—"}</td>
@@ -500,6 +507,78 @@ export default function Dashboard() {
         <PaymentTable rows={filtered} />
       </main>
 
+    </div>
+  );
+}
+
+function MonthMultiSelect({
+  options,
+  selected,
+  onChange,
+}: {
+  options: string[];
+  selected: string[];
+  onChange: (v: string[]) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const label =
+    selected.length === 0
+      ? "All months"
+      : selected.length === 1
+      ? selected[0]
+      : `${selected.length} months`;
+
+  function toggle(m: string) {
+    onChange(selected.includes(m) ? selected.filter((x) => x !== m) : [...selected, m]);
+  }
+
+  return (
+    <div className="flex items-center gap-1.5">
+      <span className="text-xs text-slate-400">Month:</span>
+      <div className="relative">
+        <button
+          onClick={() => setOpen((o) => !o)}
+          className="text-xs border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 min-w-[90px] text-left flex items-center justify-between gap-1.5"
+        >
+          <span>{label}</span>
+          <ChevronDown size={12} className="text-slate-400 shrink-0" />
+        </button>
+        {open && (
+          <>
+            {/* click-away backdrop */}
+            <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+            <div className="absolute z-50 mt-1 w-44 max-h-72 overflow-y-auto bg-white border border-slate-200 rounded-lg shadow-lg py-1">
+              <button
+                onClick={() => onChange([])}
+                className={`w-full text-left text-xs px-3 py-1.5 hover:bg-slate-50 ${selected.length === 0 ? "text-indigo-600 font-medium" : "text-slate-600"}`}
+              >
+                All months
+              </button>
+              <div className="border-t border-slate-100 my-1" />
+              {options.map((m) => {
+                const on = selected.includes(m);
+                return (
+                  <button
+                    key={m}
+                    onClick={() => toggle(m)}
+                    className="w-full text-left text-xs px-3 py-1.5 hover:bg-slate-50 flex items-center gap-2"
+                  >
+                    <span className={`inline-flex items-center justify-center w-3.5 h-3.5 rounded border ${on ? "bg-indigo-600 border-indigo-600 text-white" : "border-slate-300"}`}>
+                      {on && <Check size={10} />}
+                    </span>
+                    <span className={on ? "text-slate-800" : "text-slate-600"}>{m}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        )}
+      </div>
+      {selected.length > 0 && (
+        <button onClick={() => onChange([])} className="text-slate-300 hover:text-slate-500" title="Clear months">
+          <X size={12} />
+        </button>
+      )}
     </div>
   );
 }

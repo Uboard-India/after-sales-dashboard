@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Search, X, Phone, CheckSquare, Square, Loader2, ChevronDown } from "lucide-react";
+import { Search, X, Phone, CheckSquare, Square, Loader2, ChevronDown, Bot } from "lucide-react";
 import type { ComplaintRow } from "@/lib/types";
 import { STATUS_OPTIONS, TEAM } from "@/lib/ticketOptions";
 
@@ -355,7 +355,14 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
                   </button>
                 </td>
                 <td className="py-2 pr-3 text-slate-400 font-mono">{r.sequenceNo}</td>
-                <td className="py-2 pr-3 text-slate-700 whitespace-nowrap">{r.customerName || "—"}</td>
+                <td className="py-2 pr-3 text-slate-700 whitespace-nowrap">
+                  {r.customerName || "—"}
+                  {r.isBot && (
+                    <span className="ml-1.5 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-violet-100 text-violet-700 align-middle" title="WhatsApp bot complaint — approved, not yet in the sheet">
+                      <Bot size={9} /> BOT
+                    </span>
+                  )}
+                </td>
                 <td className="py-2 pr-3 whitespace-nowrap">
                   {r.customerMobile ? (
                     <a href={`tel:${r.customerMobile}`} className="flex items-center gap-1 text-xs text-indigo-600 hover:underline font-mono">

@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from "recharts";
-import { Store, X } from "lucide-react";
+import { Store, X, Bot } from "lucide-react";
 import type { ComplaintRow } from "@/lib/types";
 
 interface Props {
@@ -144,7 +144,14 @@ export default function PlatformBreakdown({ rows }: Props) {
                   <tr key={r.id} className="border-b border-slate-50 hover:bg-slate-50">
                     <td className="py-1.5 pr-3 font-mono text-slate-400">{r.sequenceNo}</td>
                     <td className="py-1.5 pr-3 text-slate-600 whitespace-nowrap">{r.complaintDate}</td>
-                    <td className="py-1.5 pr-3 text-slate-700 whitespace-nowrap">{r.customerName || "—"}</td>
+                    <td className="py-1.5 pr-3 text-slate-700 whitespace-nowrap">
+                      {r.customerName || "—"}
+                      {r.isBot && (
+                        <span className="ml-1.5 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-violet-100 text-violet-700 align-middle" title="WhatsApp bot complaint — not in the sheet">
+                          <Bot size={9} /> BOT
+                        </span>
+                      )}
+                    </td>
                     <td className="py-1.5 pr-3 text-slate-700 whitespace-nowrap">{r.productName || "—"}</td>
                     <td className="py-1.5 pr-3 text-slate-600 whitespace-nowrap">{r.issueType || "—"}</td>
                     <td className="py-1.5 pr-3 whitespace-nowrap">
