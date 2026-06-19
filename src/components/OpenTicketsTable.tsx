@@ -34,6 +34,7 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
   const [filterIssue, setIssue]         = useState("All");
   const [filterBrand, setBrand]         = useState("All");
   const [filterPending, setPending]     = useState("All");
+  const [view, setView]                 = useState<"all" | "open" | "closed">("all");
   const [sortDate, setSortDate]         = useState<"asc" | "desc">("asc");
   const [page, setPage]                 = useState(1);
   const [selected, setSelected]         = useState<Set<string>>(new Set());
@@ -137,11 +138,11 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     const base = rows.filter((r) => {
-      // Default (Status = All) shows only OPEN tickets. Picking a specific
-      // status — including "Close Ticket" — shows matching tickets even if closed.
-      if (filterStatus === "All") {
-        if (!r.isOpen) return false;
-      } else {
+      // Open / Closed / All toggle.
+      if (view === "open" && !r.isOpen) return false;
+      if (view === "closed" && r.isOpen) return false;
+      // Status filter (independent of the toggle).
+      if (filterStatus !== "All") {
         const s = r.actionTaken || "Registered";
         if (s !== filterStatus) return false;
       }
@@ -173,7 +174,7 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
       const diff = parseDateNum(a.complaintDate) - parseDateNum(b.complaintDate);
       return sortDate === "asc" ? diff : -diff;
     });
-  }, [rows, search, filterRequested, filterProduct, filterStatus, filterIssue, filterBrand, filterPending, sortDate]);
+  }, [rows, view, search, filterRequested, filterProduct, filterStatus, filterIssue, filterBrand, filterPending, sortDate]);
 
   const totalPages = Math.ceil(filtered.length / PER_PAGE);
   const paged = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
@@ -273,11 +274,25 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
       <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
         <div>
           <h2 className="text-sm font-semibold text-slate-700">
-            {filterStatus === "Close Ticket" ? "Closed Tickets" : "Open Tickets"}
+            {view === "open" ? "Open Tickets" : view === "closed" ? "Closed Tickets" : "All Tickets"}
           </h2>
           <p className="text-xs text-slate-400">
-            {filtered.length} shown · {openCount} open
+            {filtered.length} shown · {openCount} open · {rows.length - openCount} closed
           </p>
+        </div>
+        {/* Open / Closed / All toggle */}
+        <div className="flex rounded-lg overflow-hidden border border-slate-200">
+          {(["all", "open", "closed"] as const).map((v) => (
+            <button
+              key={v}
+              onClick={() => { setView(v); setPage(1); }}
+              className={`text-xs px-3 py-1.5 font-medium capitalize transition ${
+                view === v ? "bg-indigo-600 text-white" : "bg-white text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              {v}
+            </button>
+          ))}
         </div>
         <div className="relative">
           <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
