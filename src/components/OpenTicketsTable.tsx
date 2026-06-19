@@ -358,6 +358,7 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
                   <span className="text-[10px] group-hover:text-indigo-600">{sortDate === "asc" ? "↑" : "↓"}</span>
                 </button>
               </th>
+              <th className="text-left font-medium text-slate-400 pb-2 pr-3 whitespace-nowrap">Invoice Date</th>
               <th className="text-left font-medium text-slate-400 pb-2 whitespace-nowrap">Last Update</th>
             </tr>
           </thead>
@@ -443,6 +444,7 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
                   })() : <span className="text-slate-300">—</span>}
                 </td>
                 <td className="py-2 pr-3 text-slate-600 whitespace-nowrap">{r.complaintDate}</td>
+                <td className="py-2 pr-3 text-slate-500 whitespace-nowrap">{r.invoiceDate || "—"}</td>
                 <td className="py-2 whitespace-nowrap">
                   {r.overlayUpdatedBy ? (
                     <button
@@ -463,7 +465,7 @@ export default function OpenTicketsTable({ rows, onSaved }: Props) {
             ))}
             {paged.length === 0 && (
               <tr>
-                <td colSpan={13} className="py-8 text-center text-slate-400">No tickets match the filters</td>
+                <td colSpan={14} className="py-8 text-center text-slate-400">No tickets match the filters</td>
               </tr>
             )}
           </tbody>

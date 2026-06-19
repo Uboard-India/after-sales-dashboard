@@ -3,6 +3,7 @@ export interface ComplaintRow {
   fiscalYear: string;
   sequenceNo: string;
   complaintDate: string;
+  invoiceDate: string;
   monthYear: string;
   requestBy: string;
   customerName: string;

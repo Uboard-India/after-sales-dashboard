@@ -126,6 +126,7 @@ function parseSheet(csv: string, cfg: SheetConfig): ComplaintRow[] {
       const isOpen = actionTaken !== "Close Ticket";
 
       const cDate = parseDate(row["Complaint Date"] || "", cfg.dateOrder);
+      const invDate = parseDate(row["Invoice Date"] || "", cfg.dateOrder);
       const clDate = parseDate(row["Close Date"] || "", cfg.dateOrder);
       const prDate = parseDate(row["Product Received Date"] || "", cfg.dateOrder);
       const rpDate = parseDate(row["Return Pickup Date"] || "", cfg.dateOrder);
@@ -152,6 +153,7 @@ function parseSheet(csv: string, cfg: SheetConfig): ComplaintRow[] {
         fiscalYear: cfg.fiscalYear,
         sequenceNo: seq,
         complaintDate: toDMY(cDate) || (row["Complaint Date"] || "").trim(),
+        invoiceDate: toDMY(invDate) || (row["Invoice Date"] || "").trim(),
         monthYear: normalizeMonth(row["Month-Year"] || ""),
         requestBy: normalizeName(row[requestByKey] || ""),
         customerName: ((row[customerNameKey] || "") + "").trim(),
@@ -276,6 +278,7 @@ export async function GET() {
             fiscalYear: "FY 2026-27",
             sequenceNo: v.bot_id,
             complaintDate: toDMY(cDate),
+            invoiceDate: "",
             monthYear: normalizeMonth(
               cDate.toLocaleString("en-IN", { month: "short" }) + "-" + cDate.getFullYear()
             ),
