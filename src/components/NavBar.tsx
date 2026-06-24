@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  LayoutDashboard, Pencil, User, Table2, Bot,
+  LayoutDashboard, Table2, Bot,
   Package, LogOut, DatabaseBackup,
 } from "lucide-react";
 import NotificationBell from "./NotificationBell";
@@ -78,25 +78,10 @@ export default function NavBar() {
         {/* Nav */}
         <nav className="flex items-center gap-1 flex-wrap justify-end">
           {navLink("/",            "Dashboard",    <LayoutDashboard size={13} />)}
-
-          {/* Update Ticket — always indigo */}
-          <Link
-            href="/update"
-            className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition font-medium whitespace-nowrap ${
-              pathname === "/update"
-                ? "bg-indigo-700 text-white"
-                : "bg-indigo-600 text-white hover:bg-indigo-700"
-            }`}
-          >
-            <Pencil size={13} />
-            Update Ticket
-          </Link>
-
-          {navLink("/my-work",    "My Work",      <User size={13} />)}
-          {navLink("/live",       "Live Feed",    <Table2 size={13} />)}
-          {navLink("/verify",     "Verification", <Bot size={13} />, botCount)}
-          {navLink("/spareparts", "Spare Parts",  <Package size={13} />)}
-          {navLink("/backups",    "Backups",      <DatabaseBackup size={13} />)}
+          {navLink("/live",        "Live Feed",    <Table2 size={13} />)}
+          {navLink("/verify",      "Verification", <Bot size={13} />, botCount)}
+          {navLink("/spareparts",  "Spare Parts",  <Package size={13} />)}
+          {navLink("/backups",     "Backups",      <DatabaseBackup size={13} />)}
 
           <NotificationBell me={myName} />
 

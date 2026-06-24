@@ -5,8 +5,8 @@ export const dynamic = "force-dynamic";
 
 interface PostBody {
   botId: string;
-  decision: "new" | "linked" | "rejected";
-  linkedTo?: string;        // sequence number of existing complaint
+  decision: "new" | "linked" | "rejected" | "merged";
+  linkedTo?: string;        // existing complaint seq (linked) OR primary bot id (merged)
   verifiedBy: string;
   draft?: Record<string, string>; // edited fields from the verify form
 }
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     if (!botId)       return NextResponse.json({ error: "botId required" }, { status: 400 });
     if (!decision)    return NextResponse.json({ error: "decision required" }, { status: 400 });
     if (!verifiedBy)  return NextResponse.json({ error: "verifiedBy required" }, { status: 400 });
-    if (!["new", "linked", "rejected"].includes(decision)) {
+    if (!["new", "linked", "rejected", "merged"].includes(decision)) {
       return NextResponse.json({ error: "invalid decision" }, { status: 400 });
     }
 

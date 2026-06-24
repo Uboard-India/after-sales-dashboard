@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   ArrowLeft, Bot, CheckCircle2, Link2, XCircle,
   Phone, Package, Clock, AlertTriangle,
-  Undo2, Loader2, PhoneOff, ChevronDown, ChevronUp, User, Save,
+  Undo2, Loader2, PhoneOff, ChevronDown, ChevronUp, User, Save, Users, Combine,
 } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 import type { ComplaintRow, ApiResponse } from "@/lib/types";
@@ -48,7 +48,7 @@ interface Draft {
   brand: string;
 }
 
-type Decision = { decision: "new" | "linked" | "rejected"; linkedTo?: string; draft?: Draft };
+type Decision = { decision: "new" | "linked" | "rejected" | "merged"; linkedTo?: string; draft?: Draft };
 
 function isUrl(s: string) {
   return s?.startsWith("http");
@@ -109,6 +109,7 @@ export default function VerifyPage() {
   const [saving, setSaving] = useState<string | null>(null); // botId currently being saved
   const [saveError, setSaveError] = useState<string | null>(null);
   const [verifiedBy, setVerifiedBy] = useState("");
+  const [ungrouped, setUngrouped] = useState<Set<string>>(new Set()); // mobiles marked "not duplicates"
 
   const TEAM = TEAM_OPTIONS;
 
@@ -200,6 +201,23 @@ export default function VerifyPage() {
   const done = botEntries.filter((e) => decisions[e.botId]);
   const noMobileCount = botEntries.filter((e) => !e.hasMobile).length;
 
+  // Group pending entries that share the SAME mobile number → likely the same
+  // frustrated customer who filed the bot more than once.
+  const dupeGroups = (() => {
+    const byMobile = new Map<string, BotEntry[]>();
+    for (const e of pending) {
+      if (!e.hasMobile || ungrouped.has(e.mobile)) continue;
+      const arr = byMobile.get(e.mobile) ?? [];
+      arr.push(e);
+      byMobile.set(e.mobile, arr);
+    }
+    return Array.from(byMobile.entries())
+      .filter(([, g]) => g.length >= 2)
+      .map(([mobile, entries]) => ({ mobile, entries }));
+  })();
+  const groupedIds = new Set(dupeGroups.flatMap((g) => g.entries.map((e) => e.botId)));
+  const singlePending = pending.filter((e) => !groupedIds.has(e.botId));
+
   async function decide(botId: string, d: Decision) {
     setSaveError(null);
     if (!verifiedBy) {
@@ -236,6 +254,48 @@ export default function VerifyPage() {
 
   function undo(botId: string) {
     setDecisions(prev => { const n = { ...prev }; delete n[botId]; return n; });
+  }
+
+  async function postVerify(botId: string, d: Decision) {
+    const res = await fetch("/api/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ botId, decision: d.decision, linkedTo: d.linkedTo, verifiedBy, draft: d.draft }),
+    });
+    if (!res.ok) {
+      const j = await res.json().catch(() => ({}));
+      throw new Error(j.error || "Save failed");
+    }
+  }
+
+  /** Merge a duplicate group: primary becomes the real complaint, the rest are
+   *  marked "merged into <primary>" — tracked, not counted, not lost. */
+  async function mergeGroup(primaryId: string, entries: BotEntry[], primaryDraft: Draft, linkedTo?: string) {
+    setSaveError(null);
+    if (!verifiedBy) { setSaveError("Please select your name before merging."); return; }
+    setSaving(primaryId);
+    try {
+      localStorage.setItem("team_member", verifiedBy);
+      const primaryDecision: Decision = linkedTo
+        ? { decision: "linked", linkedTo, draft: primaryDraft }
+        : { decision: "new", draft: primaryDraft };
+      await postVerify(primaryId, primaryDecision);
+
+      const others = entries.filter((e) => e.botId !== primaryId);
+      for (const o of others) {
+        await postVerify(o.botId, { decision: "merged", linkedTo: primaryId });
+      }
+
+      setDecisions(prev => {
+        const n = { ...prev, [primaryId]: primaryDecision };
+        for (const o of others) n[o.botId] = { decision: "merged", linkedTo: primaryId };
+        return n;
+      });
+    } catch (e) {
+      setSaveError((e as Error).message);
+    } finally {
+      setSaving(null);
+    }
   }
 
   if (loading) return (
@@ -344,8 +404,20 @@ export default function VerifyPage() {
           ))}
         </div>
 
-        {/* Pending queue */}
-        {pending.map((e) => {
+        {/* Duplicate groups — same customer filed the bot more than once */}
+        {dupeGroups.map((g) => (
+          <DuplicateGroupCard
+            key={`grp-${g.mobile}`}
+            entries={g.entries}
+            helpdeskRows={helpdeskRows}
+            saving={saving}
+            onMerge={mergeGroup}
+            onSeparate={() => setUngrouped((prev) => new Set(prev).add(g.mobile))}
+          />
+        ))}
+
+        {/* Pending queue (entries not in a duplicate group) */}
+        {singlePending.map((e) => {
           const matches = findMatches(e, helpdeskRows);
           const isExpanded = expandedId === e.botId;
           const draft = getDraft(e);
@@ -619,6 +691,7 @@ export default function VerifyPage() {
                       <span className="text-slate-400">{d.draft?.product || e.product}</span>
                       {d.decision === "new"      && <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700">✓ New complaint</span>}
                       {d.decision === "linked"   && <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-100 text-indigo-700">🔗 Linked to #{d.linkedTo}</span>}
+                      {d.decision === "merged"   && <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-purple-100 text-purple-700">⊕ Merged into {d.linkedTo}</span>}
                       {d.decision === "rejected" && <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-red-100 text-red-600">✕ Rejected</span>}
                     </div>
                     <button onClick={() => undo(e.botId)} className="flex items-center gap-1 text-slate-400 hover:text-indigo-600 text-xs">
@@ -631,6 +704,128 @@ export default function VerifyPage() {
           </div>
         )}
       </main>
+    </div>
+  );
+}
+
+/** A group of pending bot entries that share the same mobile number.
+ *  Prachi picks the primary, then merges — primary becomes the complaint,
+ *  the rest are marked "merged into" it. */
+function DuplicateGroupCard({
+  entries,
+  helpdeskRows,
+  saving,
+  onMerge,
+  onSeparate,
+}: {
+  entries: BotEntry[];
+  helpdeskRows: ComplaintRow[];
+  saving: string | null;
+  onMerge: (primaryId: string, entries: BotEntry[], primaryDraft: Draft, linkedTo?: string) => void;
+  onSeparate: () => void;
+}) {
+  // Default primary = most complete, tie-break newest botId
+  const ranked = [...entries].sort((a, b) => {
+    const c = completion(b) - completion(a);
+    if (c !== 0) return c;
+    return parseInt(b.botId.replace(/\D/g, "")) - parseInt(a.botId.replace(/\D/g, ""));
+  });
+  const [primaryId, setPrimaryId] = useState(ranked[0].botId);
+  const primary = entries.find((e) => e.botId === primaryId) ?? ranked[0];
+  const customerName = entries.find((e) => e.customerName)?.customerName || "Unknown";
+  const isSaving = entries.some((e) => saving === e.botId);
+
+  const primaryDraft: Draft = {
+    customerName: primary.customerName || "",
+    mobile: primary.mobile || "",
+    product: primary.product || "",
+    issue: isUrl(primary.issue) ? "" : (primary.issue || ""),
+    platform: primary.platform || "",
+    brand: primary.brand || "",
+  };
+
+  // Does the primary also match an existing real complaint?
+  const matches = findMatches(primary, helpdeskRows);
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm overflow-hidden border-2 border-purple-300">
+      {/* Group header */}
+      <div className="flex items-center gap-2 px-4 py-2.5 bg-purple-50 border-b border-purple-100 flex-wrap">
+        <Users size={15} className="text-purple-600 shrink-0" />
+        <span className="text-sm font-semibold text-purple-800">{entries.length} entries from the same number</span>
+        <span className="flex items-center gap-1 text-xs text-slate-600 font-medium">
+          <User size={11} className="text-slate-400" /> {customerName}
+        </span>
+        <span className="flex items-center gap-1 text-xs text-slate-500 font-mono">
+          <Phone size={11} className="text-slate-400" /> {primary.mobile}
+        </span>
+        <button
+          onClick={onSeparate}
+          className="ml-auto text-xs text-slate-400 hover:text-slate-700 underline shrink-0"
+        >
+          Not duplicates — review separately
+        </button>
+      </div>
+
+      {/* Entries — pick the primary */}
+      <div className="divide-y divide-slate-100">
+        {ranked.map((e) => {
+          const pct = completion(e);
+          const isPrimary = e.botId === primaryId;
+          return (
+            <label
+              key={e.botId}
+              className={`flex items-start gap-3 px-4 py-2.5 cursor-pointer transition ${isPrimary ? "bg-emerald-50" : "hover:bg-slate-50"}`}
+            >
+              <input
+                type="radio"
+                name={`primary-${primary.mobile}`}
+                checked={isPrimary}
+                onChange={() => setPrimaryId(e.botId)}
+                className="mt-1 accent-emerald-600"
+              />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-mono text-xs font-bold text-indigo-600">{e.botId}</span>
+                  <span className="flex items-center gap-1 text-xs text-slate-400"><Clock size={10} /> {e.timestamp}</span>
+                  {e.product
+                    ? <span className="flex items-center gap-1 text-xs text-slate-600"><Package size={10} className="text-slate-400" /> {e.product}</span>
+                    : <span className="text-xs text-red-400">⚠ no product</span>}
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${pct === 100 ? "text-emerald-600 bg-emerald-100" : pct >= 50 ? "text-amber-600 bg-amber-100" : "text-red-500 bg-red-100"}`}>{pct}%</span>
+                  {isPrimary && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-600 text-white">PRIMARY — kept</span>}
+                </div>
+                {e.issue && !isUrl(e.issue) && (
+                  <p className="text-xs text-slate-500 mt-0.5 truncate">{e.issue}</p>
+                )}
+              </div>
+            </label>
+          );
+        })}
+      </div>
+
+      {/* Merge actions */}
+      <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-t border-slate-100 bg-slate-50">
+        <button
+          onClick={() => onMerge(primaryId, entries, primaryDraft)}
+          disabled={isSaving}
+          className="flex items-center gap-1.5 text-xs px-4 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 font-semibold disabled:opacity-50"
+        >
+          {isSaving ? <Loader2 size={13} className="animate-spin" /> : <Combine size={13} />}
+          Merge into {primaryId} — 1 complaint
+        </button>
+        {matches.length > 0 && (
+          <button
+            onClick={() => onMerge(primaryId, entries, primaryDraft, matches[0].seq)}
+            disabled={isSaving}
+            className="flex items-center gap-1.5 text-xs px-4 py-2 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-semibold border border-indigo-200 disabled:opacity-50"
+          >
+            <Link2 size={13} /> Merge &amp; link to existing #{matches[0].seq}
+          </button>
+        )}
+        <span className="text-xs text-slate-400 ml-auto">
+          Keeps {primaryId}, marks {entries.length - 1} other{entries.length - 1 > 1 ? "s" : ""} as merged
+        </span>
+      </div>
     </div>
   );
 }

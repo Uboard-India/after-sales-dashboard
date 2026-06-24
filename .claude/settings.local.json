@@ -24,7 +24,10 @@
       "Bash(git push *)",
       "Bash(vercel env *)",
       "Bash(git pull *)",
-      "Bash(git stash *)"
+      "Bash(git stash *)",
+      "Bash(git ls-tree *)",
+      "Bash(git tag *)",
+      "Bash(git rm *)"
     ]
   }
 }
