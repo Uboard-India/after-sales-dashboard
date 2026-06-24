@@ -40,3 +40,6 @@ api_out.json
 .next-dev.log
 
 .vercel
+
+# Loose data spreadsheets (keep local, not in repo)
+*.xlsx
